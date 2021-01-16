@@ -3,6 +3,16 @@ from discord.ext import commands
 import time
 
 
+replay = {
+    "اوتاوا": "يا هلا",
+    "صقر": "يا عمر صفر",
+    "حازم": "اسطوره البايثون عطه لكزز",
+    "بترولي": "يعني يوسف يعني طيران يعني حبيبي والله",
+    "يوسف": "يعني بترولي يعني طيران يعني حبيبي والله",
+    "-": "**Welcome To Server Ottawa Please Check <#781902561333870623> <:b9c0dcde98313119:762315185670062121> !**"
+}
+
+
 class General(commands.Cog):
     """
     General commands
@@ -151,6 +161,16 @@ class General(commands.Cog):
     @commands.command()
     async def github(self, ctx):
         await ctx.send("https://github.com/Team-Ottawa")
+
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        if ctx.content in replay:
+            await ctx.channel.send(replay[ctx.content])
+        elif ctx.content == ".":
+            m = f"Welcome To Server | > [OTTAWA || اوتاوا]\n\n        Join This Room To Read Rules Server | >  <#781902561333870623>\n        Join This Room To Read News Server | > <#799601584681517126>\n\n        Have Fun | > {self.client.get_emoji(789022158739341322)}"
+            await ctx.channel.send(f"{m} {self.client.get_emoji(779839267617636373)}\n{ctx.author.mention}")
+        else:
+            pass
 
 
 def setup(client):

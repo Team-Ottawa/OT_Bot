@@ -1,18 +1,14 @@
 import discord
 from discord.ext import commands, tasks
-import os
 import json
 from prettytable import PrettyTable
 import asyncio
+from PIL import Image
+from io import BytesIO
+from PIL import ImageFont, ImageDraw, ImageOps
+import os
+import arabic_reshaper
 
-
-replay = {
-    "اوتاوا": "يا هلا",
-    "صقر": "يا عمر صفر",
-    "حازم": "اسطوره البايثون عطه لكزز",
-    "بترولي": "يعني يوسف يعني طيران يعني حبيبي والله",
-    "يوسف": "يعني بترولي يعني طيران يعني حبيبي والله",
-}
 
 with open('./config.json', 'r') as f:
     config = json.load(f)
@@ -22,7 +18,6 @@ EXTENSIONS = [
     "post",
     "submit",
     "mod",
-    "welcome"
 ]
 
 
@@ -77,12 +72,53 @@ class sumbot(commands.Bot):
         ])
         print(tap)
 
-    async def on_message(self, ctx):
-        if ctx.content in replay:
-            await ctx.channel.send(replay[ctx.content])
-        if ctx.content == ".":
-            m = f"Welcome To Server | > [OTTAWA || اوتاوا]\n\n        Join This Room To Read Rules Server | >  <#781902561333870623>\n        Join This Room To Read News Server | > <#799601584681517126>\n\n        Have Fun | > {self.get_emoji(789022158739341322)}"
-            await ctx.channel.send(f"{m} {self.get_emoji(779839267617636373)}\n{ctx.author.mention}")
+    async def on_member_join(self, member):
+        channel = self.get_channel(781903031552835655)  # get channel
+
+        img = Image.open("./img/welcome.png")
+        ava = member.avatar_url_as(size=128)  # resize avatar member
+        data = BytesIO(await ava.read())
+        pfp = Image.open(data)
+
+        pfp = pfp.resize((160, 160))
+        bigsize = (pfp.size[0] * 3, pfp.size[1] * 3)
+        mask = Image.new('L', bigsize, 0)
+
+        img.paste(pfp, (905, 30))  # None
+
+        draw = ImageDraw.Draw(mask)
+
+        draw.ellipse((0, 0) + bigsize, fill=255)
+
+        mask = mask.resize(pfp.size, Image.ANTIALIAS)
+
+        pfp.putalpha(mask)
+
+        output = ImageOps.fit(pfp, mask.size, centering=(0.5, 0.5))
+        output.putalpha(mask)
+        output.save('./img/output.png')
+        background = Image.open('./img/welcome.png')
+        draw = ImageDraw.Draw(background)
+        background.paste(pfp, (45, 90), pfp)
+        user_tag = "#" + member.discriminator  # get user tag
+        font = ImageFont.truetype("./fonts/Sukar_Black.ttf", size=28)  # font all text
+        shadow_color = 0xe6e6e6  # shadow color all text
+        stroke_width = 2  # stroke width
+        color_stroke = "black"  # color stroke
+        draw.text(
+            [251, 150],
+            arabic_reshaper.reshape(member.name) + user_tag,  # add arabic
+            font=font,
+            # fill=shadow_color,
+            stroke_width=stroke_width,
+            stroke_fill=color_stroke)
+
+        background.save('./img/overlap.png')
+        await channel.send(
+            f"Welcome To OTTAWA: {member.mention}\nrules : <#781902561333870623>",
+            file=discord.File("./img/overlap.png"))
+        os.remove("./img/output.png")
+        os.remove("./img/overlap.png")
 
     def run(self):
         super().run(self.token, reconnect=True)
