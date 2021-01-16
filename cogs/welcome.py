@@ -6,6 +6,7 @@ from PIL import ImageFont, ImageDraw, ImageOps
 import os
 import arabic_reshaper
 
+
 class welcome(commands.Cog):
     def __init__(self, client):
         self.client = client

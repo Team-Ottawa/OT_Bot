@@ -57,6 +57,26 @@ class Mod(commands.Cog):
         if isinstance(error, commands.MissingPermissions):
             pass
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def say(self, ctx, *, arg):
+        await ctx.message.delete()
+        await ctx.send(arg)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def embed(self, ctx, *, arg):
+        await ctx.message.delete()
+        embed = discord.Embed(
+            title="OTTAWA Server",
+            description=arg,
+            timestamp=ctx.message.created_at,
+            color=0xff1303)
+        embed.set_image(url="https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif")
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        embed.set_author(name=self.client.user, icon_url=self.client.user.avatar_url)
+        await ctx.send(embed=embed)
+
 
 def setup(client):
     client.add_cog(Mod(client))
