@@ -2,3 +2,4 @@ discord
 prettytable
 asyncio
 Pillow
+arabic_reshaper
