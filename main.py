@@ -7,7 +7,11 @@ import asyncio
 
 
 replay = {
-    ".": "اهلان بيك منورنا السيرفر يا غالي",
+    "اوتاوا": "يا هلا",
+    "صقر": "يا عمر صفر",
+    "حازم": "اسطوره البايثون عطه لكزز",
+    "بترولي": "يعني يوسف يعني طيران يعني حبيبي والله",
+    "يوسف": "يعني يوسف يعني طيران يعني حبيبي والله",
 }
 
 with open('./config.json', 'r') as f:
@@ -73,11 +77,13 @@ class sumbot(commands.Bot):
         ])
         print(tap)
 
-    # async def on_message(self, ctx):
-    #     if ctx.content in replay:
-    #         await ctx.channel.send(replay[ctx.content])
-    #     else:
-    #         pass
+    async def on_message(self, ctx):
+        if ctx.content in replay:
+            await ctx.channel.send(replay[ctx.content])
+        if ctx.content == "0":
+            await ctx.channel.send(f"اهلان بيك منورنا السيرفر يا غالي\n{ctx.auhtor.mention}")
+        else:
+            pass
 
     def run(self):
         super().run(self.token, reconnect=True)
