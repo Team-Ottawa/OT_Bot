@@ -11,7 +11,7 @@ replay = {
     "صقر": "يا عمر صفر",
     "حازم": "اسطوره البايثون عطه لكزز",
     "بترولي": "يعني يوسف يعني طيران يعني حبيبي والله",
-    "يوسف": "يعني يوسف يعني طيران يعني حبيبي والله",
+    "يوسف": "يعني بترولي يعني طيران يعني حبيبي والله",
 }
 
 with open('./config.json', 'r') as f:
@@ -80,10 +80,9 @@ class sumbot(commands.Bot):
     async def on_message(self, ctx):
         if ctx.content in replay:
             await ctx.channel.send(replay[ctx.content])
-        if ctx.content == "0":
-            await ctx.channel.send(f"اهلان بيك منورنا السيرفر يا غالي\n{ctx.auhtor.mention}")
-        else:
-            pass
+        if ctx.content == ".":
+            m = f"Welcome To Server | > [OTTAWA || اوتاوا]\n\n        Join This Room To Read Rules Server | >  <#781902561333870623>\n        Join This Room To Read News Server | > <#799601584681517126>\n\n        Have Fun | > {self.get_emoji(789022158739341322)}"
+            await ctx.channel.send(f"{m} {self.get_emoji(779839267617636373)}\n{ctx.author.mention}")
 
     def run(self):
         super().run(self.token, reconnect=True)
