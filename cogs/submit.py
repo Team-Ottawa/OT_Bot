@@ -40,7 +40,7 @@ class submit(commands.Cog):
 
         await ctx.author.send(
             embed=discord.Embed(
-                description="You have 30 seconds to answer each question",
+                description="You have 3 minutes to answer each question",
                 color=0xf7072b))
         await ctx.message.add_reaction('✅')
 
@@ -51,7 +51,7 @@ class submit(commands.Cog):
                     description=i,
                     color=0xf7072b))
             try:
-                msg = await self.client.wait_for('message', timeout=30.0, check=check)
+                msg = await self.client.wait_for('message', timeout=180.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.author.send(embed=discord.Embed(
                     description='You have exceeded the time specified for submission',
