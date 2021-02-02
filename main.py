@@ -73,7 +73,7 @@ class sumbot(commands.Bot):
         print(tap)
 
     async def on_member_join(self, member):
-        channel = self.get_channel(781903031552835655)  # get channel
+        channel = self.get_channel(804724196689182740)  # get channel
 
         img = Image.open("./img/welcome.png")
         ava = member.avatar_url_as(size=128)  # resize avatar member
