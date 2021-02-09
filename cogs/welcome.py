@@ -5,18 +5,22 @@ from io import BytesIO
 from PIL import ImageFont, ImageDraw, ImageOps
 import os
 import arabic_reshaper
+import json
+
+with open('./config.json', 'r') as f:
+    config = json.load(f)
 
 
-class welcome(commands.Cog):
+class Welcome(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel = self.client.get_channel(804724196689182740)  # get channel
+        channel = self.client.get_channel(config['welcome_channel'])  # get channel
 
         img = Image.open("./img/welcome.png")
-        ava = member.avatar_url_as(size=128)  # resize avatar member
+        ava = member.avatar_url_as(size=128, format="png")  # resize avatar member
         data = BytesIO(await ava.read())
         pfp = Image.open(data)
 
@@ -41,13 +45,18 @@ class welcome(commands.Cog):
         draw = ImageDraw.Draw(background)
         background.paste(pfp, (45, 90), pfp)
         user_tag = "#" + member.discriminator  # get user tag
-        font = ImageFont.truetype("./fonts/Sukar_Black.ttf", size=28)  # font all text
-        shadow_color = 0xe6e6e6  # shadow color all text
+        font = ImageFont.truetype("./font/arial.ttf", size=40)  # font all text
         stroke_width = 2  # stroke width
         color_stroke = "black"  # color stroke
+        name = member.name
+        print(name)
+        if len(name) >= 8:
+            name = name[0:9] + "..."
+        print(name)
+        print(len(name))
         draw.text(
-            [251, 150],
-            arabic_reshaper.reshape(member.name) + user_tag,  # add arabic
+            [212, 142],
+            arabic_reshaper.reshape(name) + user_tag,  # add arabic
             font=font,
             # fill=shadow_color,
             stroke_width=stroke_width,
@@ -62,4 +71,4 @@ class welcome(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(welcome(client))
+    client.add_cog(Welcome(client))

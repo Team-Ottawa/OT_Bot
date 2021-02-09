@@ -11,6 +11,7 @@ class Mod(commands.Cog):
         self.client = client
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def accept(self, ctx, member: discord.Member):
         await ctx.send(embed=discord.Embed(
@@ -35,6 +36,7 @@ class Mod(commands.Cog):
             pass
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def reject(self, ctx, member: discord.Member, *, reason):
         await ctx.send(embed=discord.Embed(
@@ -58,12 +60,14 @@ class Mod(commands.Cog):
             pass
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def say(self, ctx, *, arg):
         await ctx.message.delete()
         await ctx.send(arg)
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def embed(self, ctx, *, arg):
         await ctx.message.delete()

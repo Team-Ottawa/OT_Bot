@@ -1,12 +1,13 @@
 {
-    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.NPcYCWbzsV4ZKyR6OeriXh_dNJg",
+    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.jpRb5ed5F7xNMBjOdsmAu1KNOqU",
     "prefix": "!",
     "client_id": 799363279595503657,
     "owner_id": [740700552593145876, 716783245387235410, 496996678088392725,386247167532072971],
-    "submit_channel": 805775997941186580
+    "submit_channel": 805775997941186580,
     "coder_role_name": "Helper",
     "mention_code_role": 795594838191112213,
     "sug_channel": 799358834190974987,
+    "welcome_channel": 804724196689182740,
     "js": {
         "js_channel": 781903206762020904,
         "js_temp": 791256944940679179
@@ -20,11 +21,11 @@
         "dbd_temp": 791256622097367070
     },
     "web": {
-        "web_channel": 781915161925517332,
+        "web_channel": 805777636168957992,
         "web_temp": 791257552486662165
     },
     "post": {
-        "post_channel": 783652248302911508,
+        "post_channel": 805777636168957992,
         "post_temp": 791256402831736842
     },
     "mention": {
