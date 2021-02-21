@@ -18,7 +18,7 @@ class Mod(commands.Cog):
             description="✅ Done been accepted successfully",
             color=0x03ff74
         ))
-        await member.add_roles(discord.utils.get(member.guild.roles, name="Helper"))
+        await member.add_roles(discord.utils.get(member.guild.roles, name="Helperᵒᵗ"))
         await member.send(embed=discord.Embed(
             description="✅ You have been accepted successfully",
             color=0x03ff74
