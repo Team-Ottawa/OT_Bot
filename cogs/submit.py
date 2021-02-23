@@ -9,7 +9,7 @@ with open('./config.json', 'r') as f:
     config = json.load(f)
 
 
-class submit(commands.Cog):
+class Submit(commands.Cog):
     def __init__(self, client):
         self.client = client
 
@@ -17,106 +17,305 @@ class submit(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 86400, commands.BucketType.user)
     async def submit(self, ctx):
-        channel = self.client.get_channel(config['submit_channel'])  # id channel
-        random_questions = [
-            "What is the difference between Node.js and JavaScript?",
-            "List two types of database?",
-            "What do you need to create a complete website?",
-            "Mention two general data types in programming?",
-            "What is the variable?",
-            "What is an integer in programming languages?"
-        ]
-        ran = random.choice(random_questions)
+        embed = discord.Embed(
+            description="**Choose the type of rank you want?**\n:black_circle: : Admin\n:yellow_circle: : coder",
+            color=discord.Color.red()
+        )
+        message = await ctx.author.send(embed=embed)
 
-        questions_1 = [
-            '1️⃣ | Write your name now:',
-            '2️⃣ | Write your age now:',
-            '3️⃣ | Write your name language now:',
-            '4️⃣ | Send us a project or no bot that you designed yourself (if you have taken the bot from someone, you will be rejected):',
-            '5️⃣ | {}:'.format(ran),
-            '6️⃣ | Before completing the application, please read the laws from here <#781902561333870623>',
-            '7️⃣ | Your submission has been completed. If you agree to send your submission or not (yes / no)']
-        answers = []
-
-        await ctx.author.send(
-            embed=discord.Embed(
-                description="You have 3 minutes to answer each question",
-                color=0xf7072b))
         await ctx.message.add_reaction('✅')
 
-        def check(m):
-            return m.author == ctx.author and m.author == ctx.author
-        for i in questions_1:
-            await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-            try:
-                msg = await self.client.wait_for('message', timeout=180.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.author.send(embed=discord.Embed(
-                    description='You have exceeded the time specified for submission',
-                    color=0xf7072b))
-                return
+        await message.add_reaction("⚫")
+        await message.add_reaction("🟡")
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ["⚫", "🟡"]
+
+        try:
+            reaction, user = await self.client.wait_for("reaction_add", timeout=60, check=check)
+
+            if str(reaction.emoji) == "⚫":
+                embed = discord.Embed(
+                    description="**enter your language?**\n:black_circle: : English Language\n:yellow_circle: : لغه عربيه",
+                    color=discord.Color.red()
+                )
+                message = await ctx.author.send(embed=embed)
+
+                await ctx.message.add_reaction('✅')
+                lang = "en"
+
+                await message.add_reaction("⚫")
+                await message.add_reaction("🟡")
+
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ["⚫", "🟡"]
+
+                try:
+                    reaction, user = await self.client.wait_for("reaction_add", timeout=60, check=check)
+
+                    if str(reaction.emoji) == "⚫":
+                        lang = "en"
+                    elif str(reaction.emoji) == "🟡":
+                        lang = "ar"
+                    else:
+                        await message.remove_reaction(reaction, user)
+
+                except asyncio.TimeoutError:
+                    await message.delete()
+                channel = self.client.get_channel(config['submit_channel'])  # id channel
+                en_questions = [
+                    '1️⃣ | Write your name now:',
+                    '2️⃣ | Write your age now:',
+                    '3️⃣ | Write down when you interacted on the server:',
+                    '4️⃣ | Have you ever been an administrator in a server?:',
+                    '5️⃣ | Before completing the application, please read the laws from here <#781902561333870623>',
+                ]
+                ar_questions = [
+                    '1️⃣ | اكتب اسمك الآن: ',
+                    '2️⃣ | اكتب عمرك الآن: ',
+                    '3️⃣ | اكتب وقت تفاعلك في السيرفر الآن: ',
+                    '4️⃣ | هل سبق لك و كنت اداري في احدى السيرفرات: ',
+                    '6️⃣ | قبل استكمال الطلب برجاء قراءة القوانين من هنا <#781902561333870623> ',
+                ]
+                answers = []
+                embed = discord.Embed(
+                    description=ctx.author.id,
+                    color=ctx.author.color,
+                    timestamp=ctx.message.created_at
+                )
+                m = "You have 3 minutes to answer each question"
+                if lang == "ar":
+                    m = "لديك 3 دقائق للإجابة على كل سؤال"
+                await ctx.author.send(
+                    embed=discord.Embed(
+                        description=m,
+                        color=0xf7072b))
+
+                def check(m):
+                    return m.author == ctx.author and m.author == ctx.author and str(m.channel.type) == "private"
+
+                nam = 0
+                if lang == "ar":
+                    en_questions = ar_questions
+                for i in en_questions:
+                    nam += 1
+                    await ctx.author.send(embed=discord.Embed(
+                        description=i,
+                        color=0xf7072b).set_author(name=f"{nam}/{len(en_questions)}"))
+                    try:
+                        msg = await self.client.wait_for('message', timeout=180.0, check=check)
+                    except asyncio.TimeoutError:
+                        m = 'You have exceeded the time specified for submit'
+                        if lang == "ar":
+                            m = "لقد تجاوزت الوقت المحدد للإرسال"
+                        await ctx.author.send(embed=discord.Embed(
+                            description=m,
+                            color=0xf7072b))
+                        return
+                    else:
+                        answers.append(msg.content)
+
+                for kay, value in enumerate(en_questions):
+                    embed.add_field(
+                        name=f"{kay} - {value}:",
+                        value=answers[kay],
+                        inline=False
+                    )
+                embed.set_author(name=self.client.user.display_name, icon_url=self.client.user.avatar_url)
+                embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+                embed.set_thumbnail(url=ctx.guild.icon_url)
+                m = "rect ✅ to send your submit\nrect ❎ to cancel yot submit"
+                if lang == "ar":
+                    m = "اضغط ✅ لارسال تقديمك\nاضغط ❌ للغاء تقديمك"
+                message = await ctx.author.send(embed=discord.Embed(
+                    description=m,
+                    color=discord.Color.green()
+                ))
+                await message.add_reaction("✅")
+                await message.add_reaction("❎")
+
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ["✅", "❎"]
+
+                try:
+                    reaction, user = await self.client.wait_for("reaction_add", timeout=60, check=check)
+
+                    if str(reaction.emoji) == "✅":
+                        await channel.send(embed=embed)
+                        m = "✅ Your submit has been sent successfully"
+                        if lang == "ar":
+                            m = "✅ تم ارسال تقديمك في نجاح"
+                        await message.edit(embed=discord.Embed(
+                            description=m,
+                            color=discord.Color.green()
+                        ))
+                    elif str(reaction.emoji) == "❎":
+                        m = "❌ Your submit has been cancel"
+                        if lang == "ar":
+                            m = "❌ تم الغاء تقديمك"
+                        await message.edit(embed=discord.Embed(
+                            description=m,
+                            color=discord.Color.red()
+                        ))
+                        pass
+                    else:
+                        await message.remove_reaction(reaction, user)
+
+                except asyncio.TimeoutError:
+                    await message.delete()
+            elif str(reaction.emoji) == "🟡":
+                embed = discord.Embed(
+                    description="**enter your language?**\n:black_circle: : English Language\n:yellow_circle: : لغه عربيه",
+                    color=discord.Color.red()
+                )
+                message = await ctx.author.send(embed=embed)
+
+                await ctx.message.add_reaction('✅')
+                lang = "en"
+
+                await message.add_reaction("⚫")
+                await message.add_reaction("🟡")
+
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ["⚫", "🟡"]
+
+                try:
+                    reaction, user = await self.client.wait_for("reaction_add", timeout=60, check=check)
+
+                    if str(reaction.emoji) == "⚫":
+                        lang = "en"
+                    elif str(reaction.emoji) == "🟡":
+                        lang = "ar"
+                    else:
+                        await message.remove_reaction(reaction, user)
+
+                except asyncio.TimeoutError:
+                    await message.delete()
+                channel = self.client.get_channel(config['submit_channel'])  # id channel
+                en_random_questions = [
+                    "What is the difference between Node.js and JavaScript?",
+                    "List two types of database?",
+                    "What do you need to create a complete website?",
+                    "Mention two general data types in programming?",
+                    "What is the variable?",
+                    "What is an integer in programming languages?"
+                ]
+                ar_random_questions = [
+                    "ما الفرق بين Node.js و JavaScript؟",
+                    "اذكر نوعين من قواعد البيانات في البرمجه؟",
+                    "ما الذي تحتاجه لإنشاء موقع ويب كامل؟",
+                    "أذكر نوعين من انواع البيانات في البرمجة؟",
+                    "ما هو المتغير في لغات البرمجه؟",
+                    "ما هو تعريف العدد في لغات البرمجة؟",
+                ]
+                en_questions = [
+                    '1️⃣ | Write your name now:',
+                    '2️⃣ | Write your age now:',
+                    '3️⃣ | Write your name language now:',
+                    '4️⃣ | Send us a project or no bot that you designed yourself (if you have taken the bot from someone, you will be rejected):',
+                    '5️⃣ | {}:'.format(random.choice(en_random_questions)),
+                    '6️⃣ | Before completing the application, please read the laws from here <#781902561333870623>',
+                ]
+                ar_questions = [
+                    '1️⃣ | اكتب اسمك الآن: ',
+                    '2️⃣ | اكتب عمرك الآن: ',
+                    '3️⃣ | اكتب لغتك البرمجيه الآن: ',
+                    '4️⃣ | أرسل لنا مشروعًا أو روبوتًا صممته بنفسك (إذا كنت قد أخذت الروبوت من شخص ما ، فسيتم رفضك): ',
+                    '5️⃣ | {}: '.format(random.choice(ar_random_questions)),
+                    '6️⃣ | قبل استكمال الطلب برجاء قراءة القوانين من هنا <#781902561333870623> ',
+                ]
+                answers = []
+                embed = discord.Embed(
+                    description=ctx.author.id,
+                    color=ctx.author.color,
+                    timestamp=ctx.message.created_at
+                )
+                m = "You have 3 minutes to answer each question"
+                if lang == "ar":
+                    m = "لديك 3 دقائق للإجابة على كل سؤال"
+                await ctx.author.send(
+                    embed=discord.Embed(
+                        description=m,
+                        color=0xf7072b))
+
+                def check(m):
+                    return m.author == ctx.author and m.author == ctx.author and str(m.channel.type) == "private"
+
+                nam = 0
+                if lang == "ar":
+                    en_questions = ar_questions
+                for i in en_questions:
+                    nam += 1
+                    await ctx.author.send(embed=discord.Embed(
+                        description=i,
+                        color=0xf7072b).set_author(name=f"{nam}/{len(en_questions)}"))
+                    try:
+                        msg = await self.client.wait_for('message', timeout=180.0, check=check)
+                    except asyncio.TimeoutError:
+                        m = 'You have exceeded the time specified for submit'
+                        if lang == "ar":
+                            m = "لقد تجاوزت الوقت المحدد للإرسال"
+                        await ctx.author.send(embed=discord.Embed(
+                            description=m,
+                            color=0xf7072b))
+                        return
+                    else:
+                        answers.append(msg.content)
+
+                for kay, value in enumerate(en_questions):
+                    embed.add_field(
+                        name=f"{kay} - {value}:",
+                        value=answers[kay],
+                        inline=False
+                    )
+                embed.set_author(name=self.client.user.display_name, icon_url=self.client.user.avatar_url)
+                embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+                embed.set_thumbnail(url=ctx.guild.icon_url)
+                m = "rect ✅ to send your submit\nrect ❎ to cancel yot submit"
+                if lang == "ar":
+                    m = "اضغط ✅ لارسال تقديمك\nاضغط ❌ للغاء تقديمك"
+                message = await ctx.author.send(embed=discord.Embed(
+                    description=m,
+                    color=discord.Color.green()
+                ))
+                await message.add_reaction("✅")
+                await message.add_reaction("❎")
+
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ["✅", "❎"]
+
+                try:
+                    reaction, user = await self.client.wait_for("reaction_add", timeout=60, check=check)
+
+                    if str(reaction.emoji) == "✅":
+                        await channel.send(embed=embed)
+                        m = "✅ Your submit has been sent successfully"
+                        if lang == "ar":
+                            m = "✅ تم ارسال تقديمك في نجاح"
+                        await message.edit(embed=discord.Embed(
+                            description=m,
+                            color=discord.Color.green()
+                        ))
+                    elif str(reaction.emoji) == "❎":
+                        m = "❌ Your submit has been cancel"
+                        if lang == "ar":
+                            m = "❌ تم الغاء تقديمك"
+                        await message.edit(embed=discord.Embed(
+                            description=m,
+                            color=discord.Color.red()
+                        ))
+                        pass
+                    else:
+                        await message.remove_reaction(reaction, user)
+
+                except asyncio.TimeoutError:
+                    await message.delete()
             else:
-                answers.append(msg.content)
+                await message.remove_reaction(reaction, user)
 
-        if answers[6] == 'yes' or answers[6] == 'Yes' or answers[6] == 'YEs' or answers[6] == 'YES':
-            await ctx.author.send(embed=discord.Embed(
-                description="✅ Your review has been submitted. Please wait for a response from Mod\nYou should wait 1h/24h max",
-                color=0xf7072b))
+        except asyncio.TimeoutError:
+            await message.delete()
 
-            embed = discord.Embed(
-                description=ctx.author.id,
-                color=ctx.author.color,
-                timestamp=ctx.message.created_at)
-            embed.add_field(
-                name=questions_1[0],
-                value=answers[0],
-                inline=False)
-            embed.add_field(
-                name=questions_1[1],
-                value=answers[1],
-                inline=False)
-            embed.add_field(
-                name=questions_1[2],
-                value=answers[2],
-                inline=False)
-            embed.add_field(
-                name=questions_1[3],
-                value=answers[3],
-                inline=False)
-            embed.add_field(
-                name=questions_1[4],
-                value=answers[4],
-                inline=False)
-            embed.add_field(
-                name="6️⃣ | Before completing the application, please read the laws from here #Rulse",
-                value=answers[5],
-                inline=False)
-            embed.add_field(
-                name=questions_1[6],
-                value=answers[6],
-                inline=False)
-
-            embed.set_author(name=self.client.user.display_name, icon_url=self.client.user.avatar_url)
-            embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
-            embed.set_thumbnail(url=ctx.guild.icon_url)
-
-            await channel.send(embed=embed)
-            return
-        elif answers[6] == 'no' or answers[6] == 'No' or answers[6] == 'NO':
-            await ctx.author.send(
-                embed=discord.Embed(
-                    description="❌ Your submission has been canceled",
-                    color=0xf7072b))
-            return
-        else:
-            await ctx.author.send(embed=discord.Embed(
-                description="❌ It seems that you have chosen the wrong answer. You can reapply again after 24h",
-                color=0xf7072b
-            ))
-            return
-        # await ctx.message.add_reaction('❌')
 
     @submit.error
     async def submit_error(self, ctx, error):
@@ -139,4 +338,4 @@ class submit(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(submit(client))
+    client.add_cog(Submit(client))

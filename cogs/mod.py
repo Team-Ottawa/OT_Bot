@@ -10,6 +10,19 @@ class Mod(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        channel = self.client.get_channel(813846326017785917)
+        if ctx.channel.id != 813842554683785228:
+            return
+        if ctx.author.bot:
+            return
+        await channel.send(embed=discord.Embed(
+            description=ctx.content,
+            color=ctx.author.color
+        ).set_footer(text=f"Request by: {ctx.author}").set_thumbnail(url=ctx.author.avatar_url))
+        await ctx.delete()
+
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
@@ -18,7 +31,7 @@ class Mod(commands.Cog):
             description="✅ Done been accepted successfully",
             color=0x03ff74
         ))
-        await member.add_roles(discord.utils.get(member.guild.roles, name="Helperᵒᵗ"))
+        # await member.add_roles(discord.utils.get(member.guild.roles, name="Helperᵒᵗ"))
         await member.send(embed=discord.Embed(
             description="✅ You have been accepted successfully",
             color=0x03ff74
@@ -53,7 +66,7 @@ class Mod(commands.Cog):
     async def reject_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(embed=discord.Embed(
-                description="❌ Please put the member ID or the mention, and add ",
+                description="❌ Please put the member ID or the mention, and add reason",
                 color=0xf7072b
             ))
         if isinstance(error, commands.MissingPermissions):
@@ -72,13 +85,10 @@ class Mod(commands.Cog):
     async def embed(self, ctx, *, arg):
         await ctx.message.delete()
         embed = discord.Embed(
-            title="OTTAWA Server",
             description=arg,
-            timestamp=ctx.message.created_at,
-            color=0xff1303)
-        embed.set_image(url="https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif")
-        embed.set_thumbnail(url=ctx.guild.icon_url)
-        embed.set_author(name=self.client.user, icon_url=self.client.user.avatar_url)
+            color=discord.Color.red()
+        )
+
         await ctx.send(embed=embed)
 
 
