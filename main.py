@@ -9,7 +9,7 @@ from PIL import ImageFont, ImageDraw, ImageOps
 import os
 import arabic_reshaper
 
-
+# حبيبي والله
 with open('./config.json', 'r') as f:
     config = json.load(f)
 
