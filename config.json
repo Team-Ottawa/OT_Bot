@@ -1,12 +1,11 @@
 {
-    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.5rRBAcyO5a6auPcmE_exkKGqyS0",
+    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.yWYMBWTNSEjMJuHnRxmHiqkfiLM",
     "prefix": "!",
     "client_id": 799363279595503657,
     "owner_id": [739232997232082944],
     "submit_channel": 805775997941186580,
     "coder_role_name": "Coder",
-    "mention_code_role": 810987637325430815,
-    "sug_channel": 799358834190974987,
+    "mention_code_role": 813514248142717011,
     "welcome_channel": 813784682138173482,
     "js": {
         "js_channel": 781903206762020904,

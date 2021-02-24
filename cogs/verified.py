@@ -23,11 +23,13 @@ class Verified(commands.Cog):
             return
         if ctx.author.id == 739232997232082944:
             return
+        if ctx.author.bot:
+            return
         time.sleep(0.2)
         await ctx.delete()
 
     @commands.command()
-    # @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def rm(self, ctx):
         embed = discord.Embed(
             description="""
@@ -56,7 +58,7 @@ Note: The answer to your request is not certain.
         await ctx.send(embed=embed)
 
     @commands.command()
-    # @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def ro(self, ctx):
         embed = discord.Embed(
             description="""
@@ -74,11 +76,11 @@ To find out how to get <@&813508149167652866> role, please go to <#8135410181077
 """,
             color=discord.Color.red()
         )
-        await ctx.send(embed=embed)
+        # await ctx.send(embed=embed)
         await ctx.send("[ @everyone ]", embed=embed)
 
     @commands.command()
-    # @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def rl(self, ctx):
         embed = discord.Embed(
             description="""

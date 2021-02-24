@@ -77,6 +77,8 @@ class Bot(commands.Bot):
     def run(self):
         super().run(self.token, reconnect=True)
 
+    async def on_command_error(self, ctx, error):
+        return
 
 if __name__ == '__main__':
     client = Bot()
