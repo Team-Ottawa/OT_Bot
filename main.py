@@ -34,6 +34,7 @@ class Bot(commands.Bot):
                 roles=config["mention"]["roles"]),
             intents=discord.Intents.all()
 )
+        self.remove_command('help')
         self.client_id = config["client_id"]
         self.owner_id = config["owner_id"]
 
