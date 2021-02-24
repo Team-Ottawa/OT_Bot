@@ -16,7 +16,12 @@ class post(commands.Cog):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def js(self, ctx):
-        if ctx.channel.id != 811002423303995442 or ctx.channel.id != 813533585646551041 or ctx.channel.id != 810949112433213450:
+        channels = [
+            811002423303995442,
+            813533585646551041,
+            810949112433213450
+        ]
+        if ctx.channel.id not in channels:
             return
         if ctx.author.bot:
             return
@@ -116,7 +121,12 @@ class post(commands.Cog):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def py(self, ctx):
-        if ctx.channel.id != 811002423303995442 or ctx.channel.id != 813533585646551041 or ctx.channel.id != 810949112433213450:
+        channels = [
+            811002423303995442,
+            813533585646551041,
+            810949112433213450
+        ]
+        if ctx.channel.id not in channels:
             return
         if ctx.author.bot:
             return
