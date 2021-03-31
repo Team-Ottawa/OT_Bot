@@ -30,7 +30,6 @@ class Welcome(commands.Cog):
             return
         if ctx.author.bot:
             return
-
         await ctx.add_reaction("<a:love:748518976371425300>")
 
 

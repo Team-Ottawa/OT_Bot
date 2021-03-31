@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import json
 
+
 with open('./config.json', 'r') as f:
     config = json.load(f)
 
@@ -9,19 +10,6 @@ with open('./config.json', 'r') as f:
 class Mod(commands.Cog):
     def __init__(self, client):
         self.client = client
-
-    @commands.Cog.listener()
-    async def on_message(self, ctx):
-        channel = self.client.get_channel(813846326017785917)
-        if ctx.channel.id != 813842554683785228:
-            return
-        if ctx.author.bot:
-            return
-        await channel.send(embed=discord.Embed(
-            description=ctx.content,
-            color=ctx.author.color
-        ).set_footer(text=f"Request by: {ctx.author}").set_thumbnail(url=ctx.author.avatar_url))
-        await ctx.delete()
 
     @commands.command()
     @commands.guild_only()
