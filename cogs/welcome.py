@@ -1,11 +1,7 @@
 import discord
 from discord.ext import commands
-from PIL import Image
-from io import BytesIO
-from PIL import ImageFont, ImageDraw, ImageOps
-import os
-import arabic_reshaper
 import json
+import db
 
 with open('./config.json', 'r') as f:
     config = json.load(f)
@@ -17,6 +13,10 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        db.cr.execute("INSERT OR IGNORE INTO users(user_id, user_name) VALUES(?, ?)", (
+            member.id,
+            member.name))
+        db.db.commit()
         channel = self.client.get_channel(config['welcome_channel'])  # get channel
         guild = self.client.get_guild(654423706294026270)
         await channel.send("""
