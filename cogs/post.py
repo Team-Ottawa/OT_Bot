@@ -2,12 +2,30 @@ import discord
 from discord.ext import commands
 import asyncio
 import json
+import db
+import random
 
 with open('./config.json', 'r') as f:
     config = json.load(f)
 
 
-class post(commands.Cog):
+def get_code_id():
+    date = "qwertyuiopasdfghjklzxcvbnm_-1234567890"
+    data_ = db.cr.execute("SELECT * FROM vip").fetchall()
+    da = [i for i in data_]
+    id = ""
+
+    def gen_id(id):
+        while len(id) != 10:
+            value = random.choice(date)
+            id += value
+        return id
+    if gen_id in da:
+        gen_id(id)
+    return gen_id(id)
+
+
+class PostCode(commands.Cog):
     def __init__(self, client):
         self.client = client
 
@@ -16,128 +34,58 @@ class post(commands.Cog):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def js(self, ctx):
-        channels = [
-            811002423303995442,
-            813533585646551041,
-            810949112433213450
-        ]
-        if ctx.channel.id not in channels:
-            return
-        if ctx.author.bot:
-            return
-
-        channel = self.client.get_channel(config["js"]['js_channel'])  # id channel 779371022939848775
-        channel2 = self.client.get_channel(config["js"]['js_temp'])  # id channel
-
-        questions_1 = [
+        share = Share(self.client, 781903206762020904, "javascript", [
             'Write the code now without putting tags:',
             'Write the copyright:',
-            'Write the code title',
-            'Write the code description',
-            'Confirm Code Share (Yes / No)']
-        answers = []
-        await ctx.author.send(embed=discord.Embed(
-            description="You have 3 minutes to answer each question",
-            color=0xf7072b
-        ))
-        await ctx.message.add_reaction('✅')
-
-        def check(m):
-            return m.author == ctx.author and m.author == ctx.author and str(m.channel.type) == "private"
-
-        for i in questions_1:
-            await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-            try:
-                msg = await self.client.wait_for('message', timeout=180.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.author.send(embed=discord.Embed(
-                    description='You have exceeded the specified time',
-                    color=0xf7072b))
-                return
-            else:
-                answers.append(msg.content)
-        if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-            await ctx.author.send(embed=discord.Embed(
-                    description='Your code has been shared with everyone',
-                    color=0xf7072b))
-            embed = discord.Embed(description='''
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```js\n{}\n```
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **shared By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights** : {}
-<:330e0c76068aa97d:761876595006767104> **language** : javascript
-    '''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]))
-
-            my_msg = await channel.send("<@&{}>".format(config["mention_code_role"]), embed=embed)
-            await channel2.send(embed=embed)
-            await channel2.send(
-                'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-            await my_msg.add_reaction('<a:up__:775832508280733716>')
-            await my_msg.add_reaction('<a:down__:775832765518184488>')
-            await channel.send(
-                'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-            return
-        elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-            await ctx.author.send(embed=discord.Embed(
-                    description='The code has been unshared',
-                    color=0xf7072b))
-            return
-        else:
-            await ctx.author.send(embed=discord.Embed(
-                description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-                color=0xf7072b
-            ))
-            return
-
-    @commands.has_any_role(config['coder_role_name'])
-    @js.error
-    async def js_error(self, ctx, error):
-        if isinstance(error, commands.MissingAnyRole):
-            pass
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            pass
-        elif isinstance(error, commands.CommandInvokeError):
-            await ctx.author.send(embed=discord.Embed(
-                description="❌ Please open your DM before applying and reapply again after 5 minutes",
-                color=0xf7072b
-            ))
-        if isinstance(error, commands.CommandOnCooldown):
-            m, s = divmod(error.retry_after, 60)
-            h, m = divmod(m, 60)
-            await ctx.send(embed=discord.Embed(
-                description="❌ It seems that you have chosen the wrong answer. You can reapply again after {}".format("%02d minutes, %02d seconds" % (m, s)),
-                color=0xf7072b
-            ))
-        else:
-            print(error)
+            'Write the code title:',
+            'Write the code description:',
+            'Confirm Code Share (Yes / No):'])
+        await share.share(ctx, mention=True)
 
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def py(self, ctx):
-        channels = [
-            811002423303995442,
-            813533585646551041,
-            810949112433213450
-        ]
-        if ctx.channel.id not in channels:
-            return
-        if ctx.author.bot:
-            return
-        channel = self.client.get_channel(config["py"]['py_channel'])  # id channel
-        channel2 = self.client.get_channel(config["py"]['py_temp'])  # id channel
-        questions_1 = [
+        share = Share(self.client, 826883707465105408, "python", [
             'Write the code now without putting tags:',
             'Write the copyright:',
             'Write the code title:',
             'Write the code description:',
-            'Confirm Code Share (Yes / No):']
+            'Confirm Code Share (Yes / No):'])
+        await share.share(ctx, mention=True)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 300, commands.BucketType.user)
+    async def post(self, ctx):
+        share = Share(self.client, 826883707465105408, "javascript", [
+            'Write the code now without putting tags:',
+            'Write the copyright:',
+            'Write the code title:',
+            'Write the code description:',
+            'Confirm Code Share (Yes / No):'])
+        await share.share(ctx, mention=False)
+
+
+def setup(client):
+    client.add_cog(PostCode(client))
+
+
+class Share:
+    def __init__(self, client, channel: int, type: str, questions: list):
+        self.client = client
+        self.channel = channel
+        self.questions = questions
+        self.type = type
+
+    async def share(self, ctx, mention=False):
+        channels = [811002423303995442, 813533585646551041, 810949112433213450, 813851049722511390]
+        if ctx.channel.id not in channels:
+            return
+        if ctx.author.bot:
+            return
+        channel = self.client.get_channel(self.channel)  # id channel
         answers = []
         await ctx.author.send(embed=discord.Embed(
             description="You have 3 minutes to answer each question",
@@ -148,7 +96,7 @@ class post(commands.Cog):
         def check(m):
             return m.author == ctx.author and m.author == ctx.author and str(m.channel.type) == "private"
 
-        for i in questions_1:
+        for i in self.questions:
             await ctx.author.send(embed=discord.Embed(
                 description=i,
                 color=0xf7072b))
@@ -161,31 +109,29 @@ class post(commands.Cog):
                 return
             else:
                 answers.append(msg.content)
-        if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
+        if answers[4].lower() == 'yes':
             await ctx.author.send(embed=discord.Embed(
                 description='Your code has been shared with everyone',
                 color=0xf7072b))
-            embed = discord.Embed(description='''
+            embed = discord.Embed(description=f'''
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```py\n{}\n```
+```{self.type[:2]}\n{answers[0]}\n```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **shared By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights** : {}
-<:330e0c76068aa97d:761876595006767104> **language** : python
-    '''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]))
-
-            my_msg = await channel.send("<@&{}>".format(config["mention_code_role"]), embed=embed)
-            await channel2.send(embed=embed)
-            await channel2.send(
-                'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-            await my_msg.add_reaction('<a:up__:775832508280733716>')
-            await my_msg.add_reaction('<a:down__:775832765518184488>')
-            await channel.send(
-                'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
+{self.client.get_emoji(761876595770130452)} **codes** : {answers[2]}
+{self.client.get_emoji(761876609358757918)} **Description** : {answers[3]}
+{self.client.get_emoji(761876608196804609)} **shared By** : {ctx.author.mention}
+{self.client.get_emoji(761876614761807883)} **copyrights** : {answers[1]}
+{self.client.get_emoji(761876595006767104)} **language** : {self.type}
+    ''')
+            if mention:
+                await channel.send(ctx.guild.get_role(813514248142717011).mention, embed=embed)
+                db.cr.execute("INSERT OR IGNORE INTO codes(code_id, coder_id, code, type_code) VALUES(?, ?, ?, ?)", (
+                    get_code_id(), ctx.author.id, answers[0], self.type))
+                db.db.commit()
+                return
+            await channel.send(embed=embed)
             return
-        elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
+        elif answers[4].lower() == 'no':
             await ctx.author.send(embed=discord.Embed(
                 description='The code has been unshared',
                 color=0xf7072b))
@@ -196,500 +142,3 @@ class post(commands.Cog):
                 color=0xf7072b
             ))
             return
-
-    @commands.has_any_role(config['coder_role_name'])
-    @py.error
-    async def py_error(self, ctx, error):
-        if isinstance(error, commands.MissingAnyRole):
-            pass
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            pass
-        elif isinstance(error, commands.CommandInvokeError):
-            await ctx.author.send(embed=discord.Embed(
-                description="❌ Please open your DM before applying and reapply again after 5 minutes",
-                color=0xf7072b
-            ))
-        if isinstance(error, commands.CommandOnCooldown):
-            m, s = divmod(error.retry_after, 60)
-            h, m = divmod(m, 60)
-            await ctx.send(embed=discord.Embed(
-                description="❌ It seems that you have chosen the wrong answer. You can reapply again after {}".format("%02d minutes, %02d seconds" % (m, s)),
-                color=0xf7072b
-            ))
-        else:
-            print(error)
-
-#     @commands.command()
-#     @commands.guild_only()
-#     @commands.cooldown(1, 300, commands.BucketType.user)
-#     @commands.has_any_role(config['coder_role_name'])
-#     async def dbd(self, ctx):
-#         channel = self.client.get_channel(config["dbd"]['dbd_channel'])  # id channel
-#         channel2 = self.client.get_channel(config["dbd"]['dbd_temp'])  # id channel
-#
-#         questions_1 = [
-#             'Write the code now without putting tags:',
-#             'Write the copyright:',
-#             'Write the code title',
-#             'Write the code description',
-#             'Confirm Code Share (Yes / No)']
-#         answers = []
-#         await ctx.author.send(embed=discord.Embed(
-#             description="You have 3 minutes to answer each question",
-#             color=0xf7072b
-#         ))
-#         await ctx.message.add_reaction('✅')
-#
-#         def check(m):
-#             return m.author == ctx.author and m.author == ctx.author
-#         for i in questions_1:
-#             await ctx.author.send(embed=discord.Embed(
-#                 description=i,
-#                 color=0xf7072b))
-#             try:
-#                 msg = await self.client.wait_for('message', timeout=180.0, check=check)
-#             except asyncio.TimeoutError:
-#                 await ctx.author.send(embed=discord.Embed(
-#                     description='You have exceeded the specified time',
-#                     color=0xf7072b))
-#                 return
-#             else:
-#                 answers.append(msg.content)
-#         if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-#             await ctx.author.send(embed=discord.Embed(
-#                 description='Your code has been shared with everyone',
-#                 color=0xf7072b))
-#             embed = discord.Embed(description='''
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# ```d\n{}\n```
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# <:aea4f8d034911298:761876595770130452> **codes** : {}
-# <:cb485bd4e5010caa:761876609358757918> **Description** : {}
-# <:a66b5fda582d1606:761876608196804609> **shared By** : {}
-# <:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-# <:330e0c76068aa97d:761876595006767104> **language** : dbd
-# '''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]))
-#
-#             my_msg = await channel.send("<@&{}>".format(config["mention_code_role"]), embed=embed)
-#             await channel2.send(embed=embed)
-#             await channel2.send('https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-#             await my_msg.add_reaction('<a:up__:775832508280733716>')
-#             await my_msg.add_reaction('<a:down__:775832765518184488>')
-#             await channel.send('https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-#             return
-#         elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-#             await ctx.author.send(embed=discord.Embed(
-#                 description='The code has been unshared',
-#                 color=0xf7072b))
-#             return
-#         else:
-#             await ctx.author.send(embed=discord.Embed(
-#                 description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-#                 color=0xf7072b
-#             ))
-#             return
-#
-#     @commands.has_any_role(config['coder_role_name'])
-#     @dbd.error
-#     async def dbd_error(self, ctx, error):
-#         if isinstance(error, commands.MissingAnyRole):
-#             pass
-#         if isinstance(ctx.channel, discord.channel.DMChannel):
-#             pass
-#         elif isinstance(error, commands.CommandInvokeError):
-#             await ctx.author.send(embed=discord.Embed(
-#                 description="❌ Please open your DM before applying and reapply again after 5 minutes",
-#                 color=0xf7072b
-#             ))
-#         if isinstance(error, commands.CommandOnCooldown):
-#             m, s = divmod(error.retry_after, 60)
-#             h, m = divmod(m, 60)
-#             await ctx.send(embed=discord.Embed(
-#                 description="❌ It seems that you have chosen the wrong answer. You can reapply again after {}".format("%02d minutes, %02d seconds" % (m, s)),
-#                 color=0xf7072b
-#             ))
-#         else:
-#             print(error)
-#
-#     @commands.command()
-#     @commands.guild_only()
-#     @commands.has_any_role(config['coder_role_name'])
-#     async def web(self, ctx):
-#         channel = self.client.get_channel(config["web"]['web_channel'])  # id channel
-#         channel2 = self.client.get_channel(config["web"]['web_temp'])
-#         questions_1 = [
-#             'Write the code now without putting tags:',
-#             'Write the copyright:',
-#             'Write the code title',
-#             'Write the code description',
-#             'Confirm Code Share (Yes / No)']
-#         answers = []
-#         await ctx.author.send(embed=discord.Embed(
-#             description="You have 3 minutes to answer each question",
-#             color=0xf7072b
-#         ))
-#         await ctx.message.add_reaction('✅')
-#
-#         def check(m):
-#             return m.author == ctx.author and m.author == ctx.author
-#         for i in questions_1:
-#             await ctx.author.send(embed=discord.Embed(
-#                 description=i,
-#                 color=0xf7072b))
-#             try:
-#                 msg = await self.client.wait_for('message', timeout=180.0, check=check)
-#             except asyncio.TimeoutError:
-#                 await ctx.author.send(embed=discord.Embed(
-#                     description='You have exceeded the specified time',
-#                     color=0xf7072b))
-#                 return
-#             else:
-#                 answers.append(msg.content)
-#         if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-#             await ctx.author.send(embed=discord.Embed(
-#                 description='Your code has been shared with everyone',
-#                 color=0xf7072b))
-#             embed = discord.Embed(description='''
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# ```html\n{}\n```
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# <:aea4f8d034911298:761876595770130452> **codes** : {}
-# <:cb485bd4e5010caa:761876609358757918> **Description** : {}
-# <:a66b5fda582d1606:761876608196804609> **shared By** : {}
-# <:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-# <:330e0c76068aa97d:761876595006767104> **language** : html/css
-# '''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]))
-#             my_msg = await channel.send("<@&{}>".format(config["mention_code_role"]), embed=embed)
-#             await channel2.send(embed=embed)
-#             await my_msg.add_reaction('<a:up__:775832508280733716>')
-#             await my_msg.add_reaction('<a:down__:775832765518184488>')
-#             await channel.send('https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-#             return
-#         elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-#             await ctx.author.send(embed=discord.Embed(
-#                 description='The code has been unshared',
-#                 color=0xf7072b))
-#             return
-#         else:
-#             await ctx.author.send(embed=discord.Embed(
-#                 description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-#                 color=0xf7072b
-#             ))
-#             return
-#
-#     @commands.has_any_role(config['coder_role_name'])
-#     @web.error
-#     async def web_error(self, ctx, error):
-#         if isinstance(error, commands.MissingAnyRole):
-#             pass
-#         if isinstance(ctx.channel, discord.channel.DMChannel):
-#             pass
-#         elif isinstance(error, commands.CommandInvokeError):
-#             await ctx.author.send(embed=discord.Embed(
-#                 description="❌ Please open your DM before applying and reapply again after 5 minutes",
-#                 color=0xf7072b
-#             ))
-#         if isinstance(error, commands.CommandOnCooldown):
-#             m, s = divmod(error.retry_after, 60)
-#             h, m = divmod(m, 60)
-#             await ctx.send(embed=discord.Embed(
-#                 description="❌ It seems that you have chosen the wrong answer. You can reapply again after {}".format("%02d minutes, %02d seconds" % (m, s)),
-#                 color=0xf7072b
-#             ))
-#         else:
-#             print(error)
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.user)
-    async def post(self, ctx):
-        if ctx.channel.id != 813851049722511390:
-            return
-        if ctx.author.bot:
-            return
-        channel = self.client.get_channel(config["post"]['post_channel'])  # id channel
-        channel2 = self.client.get_channel(config["post"]['post_temp'])
-        await ctx.message.add_reaction('✅')
-        questions_1 = [
-            'Write the code now without putting tags:',
-            'Write the copyright:',
-            'Write the code title',
-            'Write the code description',
-            'Confirm Code Share (Yes / No)']
-        answers = []
-        enter_nam = [
-            "1",
-            "2",
-            "3",
-            "4"
-        ]
-        loop_nam = [1]
-
-        def check(m):
-            return m.author == ctx.author and m.author == ctx.author
-
-        for i in loop_nam:
-            await ctx.author.send(embed=discord.Embed(
-                title="Choose the appropriate number for the language in which you want to publish the code",
-                description="1 => js\n2 => py\n3 => web(html, css)\n4 => dbd",
-                color=0xf7072b))
-            try:
-                msg = await self.client.wait_for('message', timeout=180.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.author.send(embed=discord.Embed(
-                        description='You have exceeded the specified time',
-                        color=0xf7072b))
-                return
-            else:
-                if msg.content in enter_nam:
-                    n = int(msg.content)
-                elif msg.content not in enter_nam:
-                    await ctx.author.send(embed=discord.Embed(
-                        description="It seems that you made a mistake in choosing the language, you can try after five minutes",
-                        color=0xf7072b))
-                    break
-        if n == 1:
-
-            await ctx.author.send(embed=discord.Embed(
-                description="You have 3 minutes to answer each question",
-                color=0xf7072b
-            ))
-
-            for i in questions_1:
-                await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-                try:
-                    msg = await self.client.wait_for('message', timeout=180.0, check=check)
-                except asyncio.TimeoutError:
-                    await ctx.author.send(embed=discord.Embed(
-                        description="It seems that you made a mistake in choosing the language, you can try after five minutes",
-                        color=0xf7072b))
-                    return
-                else:
-                    answers.append(msg.content)
-            if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-                await ctx.author.send(embed=discord.Embed(
-                    description='Your code has been shared with everyone',
-                    color=0xf7072b))
-                embed = discord.Embed(description='''
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```js\n{}\n```
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **Shard By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-<:330e0c76068aa97d:761876595006767104> **language** : javascript
-'''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]), color=0xe1ff00)
-
-                my_msg = await channel.send(embed=embed)
-                await channel2.send(embed=embed)
-                await channel2.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                await my_msg.add_reaction('<a:up__:775832508280733716>')
-                await my_msg.add_reaction('<a:down__:775832765518184488>')
-                await channel.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                return
-            elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-                await ctx.author.send(embed=discord.Embed(
-                    description='The code has been unshared',
-                    color=0xf7072b))
-                return
-            else:
-                await ctx.author.send(embed=discord.Embed(
-                    description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-                    color=0xf7072b
-                ))
-                return
-
-        if n == 2:
-
-            await ctx.author.send(embed=discord.Embed(
-                description="You have 3 minutes to answer each question",
-                color=0xf7072b
-            ))
-
-            for i in questions_1:
-                await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-                try:
-                    msg = await self.client.wait_for('message', timeout=180.0, check=check)
-                except asyncio.TimeoutError:
-                    await ctx.author.send(embed=discord.Embed(
-                        description="It seems that you made a mistake in choosing the language, you can try after five minutes",
-                        color=0xf7072b))
-                    return
-                else:
-                    answers.append(msg.content)
-            if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-                await ctx.author.send(embed=discord.Embed(
-                    description='Your code has been shared with everyone',
-                    color=0xf7072b))
-                embed = discord.Embed(description='''
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```py\n{}\n```
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **Shard By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-<:330e0c76068aa97d:761876595006767104> **language** : python
-'''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]), color=0x5000bf)
-
-                my_msg = await channel.send(embed=embed)
-                await channel2.send(embed=embed)
-                await channel2.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                await my_msg.add_reaction('<a:up__:775832508280733716>')
-                await my_msg.add_reaction('<a:down__:775832765518184488>')
-                await channel.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                return
-            elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-                await ctx.author.send(embed=discord.Embed(
-                    description='The code has been unshared',
-                    color=0xf7072b))
-                return
-            else:
-                await ctx.author.send(embed=discord.Embed(
-                    description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-                    color=0xf7072b
-                ))
-                return
-
-        if n == 3:
-
-            await ctx.author.send(embed=discord.Embed(
-                description="You have 3 minutes to answer each question",
-                color=0xf7072b
-            ))
-
-            for i in questions_1:
-                await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-                try:
-                    msg = await self.client.wait_for('message', timeout=180.0, check=check)
-                except asyncio.TimeoutError:
-                    await ctx.author.send(embed=discord.Embed(
-                        description="It seems that you made a mistake in choosing the language, you can try after five minutes",
-                        color=0xf7072b))
-                    return
-                else:
-                    answers.append(msg.content)
-            if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-                await ctx.author.send(embed=discord.Embed(
-                    description='Your code has been shared with everyone',
-                    color=0xf7072b))
-                embed = discord.Embed(description='''
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```html\n{}\n```
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **Shard By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-<:330e0c76068aa97d:761876595006767104> **language** : html/css
-'''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]), color=0xf2180c)
-
-                my_msg = await channel.send(embed=embed)
-                await channel2.send(embed=embed)
-                await channel2.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                await my_msg.add_reaction('<a:up__:775832508280733716>')
-                await my_msg.add_reaction('<a:down__:775832765518184488>')
-                await channel.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                return
-            elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-                await ctx.author.send(embed=discord.Embed(
-                    description='The code has been unshared',
-                    color=0xf7072b))
-                return
-            else:
-                await ctx.author.send(embed=discord.Embed(
-                    description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-                    color=0xf7072b
-                ))
-                return
-
-        if n == 4:
-            await ctx.author.send(embed=discord.Embed(
-                description="You have 3 minutes to answer each question",
-                color=0xf7072b
-            ))
-
-            for i in questions_1:
-                await ctx.author.send(embed=discord.Embed(
-                    description=i,
-                    color=0xf7072b))
-                try:
-                    msg = await self.client.wait_for('message', timeout=180.0, check=check)
-                except asyncio.TimeoutError:
-                    await ctx.author.send(embed=discord.Embed(
-                        description="It seems that you made a mistake in choosing the language, you can try after five minutes",
-                        color=0xf7072b))
-                    return
-                else:
-                    answers.append(msg.content)
-            if answers[4] == 'yes' or answers[4] == "Yes" or answers[4] == "YES":
-                await ctx.author.send(embed=discord.Embed(
-                    description='Your code has been shared with everyone',
-                    color=0xf7072b))
-                embed = discord.Embed(description='''
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```d\n{}\n```
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-<:aea4f8d034911298:761876595770130452> **codes** : {}
-<:cb485bd4e5010caa:761876609358757918> **Description** : {}
-<:a66b5fda582d1606:761876608196804609> **Shard By** : {}
-<:73aff2681a13b61a:761876614761807883> **copyrights**: {}
-<:330e0c76068aa97d:761876595006767104> **language** : dbd
-'''.format(answers[0], answers[2], answers[3], ctx.author.mention, answers[1]), color=0x580fd6)
-
-                my_msg = await channel.send(embed=embed)
-                await channel2.send(embed=embed)
-                await channel2.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                await my_msg.add_reaction('<a:up__:775832508280733716>')
-                await my_msg.add_reaction('<a:down__:775832765518184488>')
-                await channel.send(
-                    'https://cdn.discordapp.com/attachments/754398470558842930/771086560941965322/42_E25EB2C-1.gif')
-                return
-            elif answers[4] == 'no' or answers[4] == 'No' or answers[4] == 'NO':
-                await ctx.author.send(embed=discord.Embed(
-                    description='The code has been unshared',
-                    color=0xf7072b))
-                return
-            else:
-                await ctx.author.send(embed=discord.Embed(
-                    description="❌ It seems that you have chosen the wrong answer. You can reapply again after 5 minutes",
-                    color=0xf7072b
-                ))
-                return
-
-    @post.error
-    async def post_error(self, ctx, error):
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            pass
-        elif isinstance(error, commands.CommandInvokeError):
-            await ctx.author.send(embed=discord.Embed(
-                description="❌ Please open your DM before applying and reapply again after 5 minutes",
-                color=0xf7072b
-            ))
-        if isinstance(error, commands.CommandOnCooldown):
-            m, s = divmod(error.retry_after, 60)
-            h, m = divmod(m, 60)
-            await ctx.send(embed=discord.Embed(
-                description="❌ It seems that you have chosen the wrong answer. You can reapply again after {}".format("%02d minutes, %02d seconds" % (m, s)),
-                color=0xf7072b
-            ))
-        else:
-            print(error)
-
-
-def setup(client):
-    client.add_cog(post(client))

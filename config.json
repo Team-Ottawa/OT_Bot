@@ -1,5 +1,5 @@
 {
-    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.Xk69uPQcbC-mBd6jJYRoFG94kbc",
+    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.-6tq8sSbQezwbLFmOZ997PLCmYQ",
     "prefix": "!",
     "guild_id": "654423706294026270",
     "client_id": 799363279595503657,
@@ -8,26 +8,6 @@
     "coder_role_name": "Coder",
     "mention_code_role": 813514248142717011,
     "welcome_channel": 813784682138173482,
-    "js": {
-        "js_channel": 781903206762020904,
-        "js_temp": 791256944940679179
-    },
-    "py": {
-        "py_channel": 781915117033357332,
-        "py_temp": 791257182305124352
-    },
-    "dbd": {
-        "dbd_channel": 783651392119767081,
-        "dbd_temp": 791256622097367070
-    },
-    "web": {
-        "web_channel": 805777636168957992,
-        "web_temp": 791257552486662165
-    },
-    "post": {
-        "post_channel": 805777636168957992,
-        "post_temp": 791256402831736842
-    },
     "mention": {
         "everyone": true,
         "users": true,

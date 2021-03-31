@@ -64,12 +64,15 @@ class Bot(commands.Bot):
     @tasks.loop(seconds=10.0)
     async def change_stats(self):
         status = [
-            '!help | OT Bot',
-            'OTTAWA Team Is Best'
+            '!help | OTTAWA.exe',
+            'OTTAWA Team',
+            '🧀'
             ]
         await self.change_presence(activity=discord.Game(type=discord.ActivityType.listening, name=(status[0])))
         await asyncio.sleep(30)
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status[1]))
+        await asyncio.sleep(10)
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status[2]))
         await asyncio.sleep(10)
 
     async def on_ready(self):
