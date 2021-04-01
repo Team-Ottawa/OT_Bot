@@ -32,7 +32,7 @@ class Vip(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(help='to show your vip time ended')
     @commands.guild_only()
     async def myvip(self, ctx):
         data = db.cr.execute("SELECT * FROM vip").fetchall()
@@ -56,7 +56,7 @@ class Vip(commands.Cog):
         #     t = f"{time}s"
         await ctx.send('حمبي ضل لك {}'.format(convert_to_timer(time)))
 
-    @commands.command(name='setvip', aliases=["addvip"])
+    @commands.command(name='setvip', aliases=["addvip"], hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def set_vip(self, ctx, user: discord.Member, time):
@@ -77,7 +77,7 @@ class Vip(commands.Cog):
         )
         await vip_log.send(embed=embed)
 
-    @commands.command(name='removevip', aliases=["revip"])
+    @commands.command(name='removevip', aliases=["revip"], hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def remove_vip(self, ctx, user: discord.Member):

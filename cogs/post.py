@@ -29,7 +29,7 @@ class PostCode(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
@@ -42,7 +42,7 @@ class PostCode(commands.Cog):
             'Confirm Code Share (Yes / No):'])
         await share.share(ctx, mention=True)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
@@ -55,7 +55,7 @@ class PostCode(commands.Cog):
             'Confirm Code Share (Yes / No):'])
         await share.share(ctx, mention=True)
 
-    @commands.command()
+    @commands.command(help='post your code')
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def post(self, ctx):

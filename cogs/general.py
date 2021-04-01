@@ -29,7 +29,7 @@ class General(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(help='to set your custom prefix')
     @commands.guild_only()
     async def prefix(self, ctx, *, new_prefix):
         if len(new_prefix) >= 5:
@@ -42,7 +42,7 @@ class General(commands.Cog):
         db.db.commit()
         await ctx.send("حمبي البرفكس تبعك `{}`".format(new_prefix))
 
-    @commands.command()
+    @commands.command(help='to set your custom title')
     @commands.guild_only()
     async def title(self, ctx, *, title):
         if ctx.author.bot:
@@ -53,7 +53,7 @@ class General(commands.Cog):
         db.db.commit()
         await ctx.message.add_reaction(self.client.get_emoji(771050418498306068))
 
-    @commands.command(invoke_without_command=True, help='To know the connection speed of the bot on the server')
+    @commands.command(invoke_without_command=True, hidden=True)
     @commands.guild_only()
     async def ping(self, ctx):
         before = time.monotonic()
@@ -61,7 +61,7 @@ class General(commands.Cog):
         ping = (time.monotonic() - before) * 1000
         await msg.edit(content="```c\nTime taken: {}ms\nDiscord API: {}ms```".format(int(ping), round(self.client.latency * 1000)))
 
-    @commands.command()
+    @commands.command(help='show the info users')
     @commands.guild_only()
     async def profile(self, ctx, member: discord.Member = None):
         member = member if member else ctx.author

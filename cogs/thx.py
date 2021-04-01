@@ -10,7 +10,7 @@ class Thx(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(name='thx', aliases=['thanks', "شكر"])
+    @commands.command(name='thx', aliases=['thanks', "شكر"], help='to thanks the Helper')
     @commands.guild_only()
     async def thx_command(self, ctx, user: discord.Member):
         if user == ctx.author:

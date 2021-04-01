@@ -70,7 +70,7 @@ class Submit(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(aliases=['sub'])
+    @commands.command(aliases=['sub'], help='submit to Helper role')
     @commands.guild_only()
     @commands.cooldown(1, 86400, commands.BucketType.user)
     async def submit(self, ctx):

@@ -11,7 +11,7 @@ class Mod(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def accept(self, ctx, member: discord.Member):
@@ -25,18 +25,7 @@ class Mod(commands.Cog):
             color=0x03ff74
         ))
 
-    @commands.has_permissions(administrator=True)
-    @accept.error
-    async def accept_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(embed=discord.Embed(
-                description="❌ Please put the member ID or the mention",
-                color=0xf7072b
-            ))
-        if isinstance(error, commands.MissingPermissions):
-            pass
-
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def reject(self, ctx, member: discord.Member, *, reason):
@@ -49,25 +38,14 @@ class Mod(commands.Cog):
             color=0xf7072b
         ))
 
-    @commands.has_permissions(administrator=True)
-    @reject.error
-    async def reject_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(embed=discord.Embed(
-                description="❌ Please put the member ID or the mention, and add reason",
-                color=0xf7072b
-            ))
-        if isinstance(error, commands.MissingPermissions):
-            pass
-
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def say(self, ctx, *, arg):
         await ctx.message.delete()
         await ctx.send(arg)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def embed(self, ctx, *, arg):

@@ -7,7 +7,7 @@ class Verified(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(name="verified", aliases=["verify", "تحقق"])
+    @commands.command(name="verified", aliases=["verify", "تحقق"], hidden=True)
     @commands.guild_only()
     async def verified_command(self, ctx):
         if ctx.channel.id != 813520464872734740:
