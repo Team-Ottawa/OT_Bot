@@ -91,21 +91,23 @@ class Vip(commands.Cog):
         data = db.cr.execute("SELECT * FROM vip").fetchall()
         for i in data:
             if i[2] <= 0:
-                user = self.client.get_user(i[0])
-                try:
+                    user = self.client.get_guild(654423706294026270).get_member(i[0])
                     vip_log = self.client.get_channel(826863222510190614)
                     db.cr.execute("DELETE FROM vip WHERE user_id = ?", (i[0],))
                     db.db.commit()
-                    await user.send("**Your __@VIP code__ has been ended, to buy again content owners role @Founder.**")
+                    await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
                     await vip_log.send(embed=discord.Embed(
                         title="end vip",
                         description=f"**User:** {user.mention}",
                         color=discord.Color.red(),
                     ))
-                    await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
+                    try:
+                        await user.send("**Your __@VIP code__ has been ended, to buy again content owners role @Founder.**")
+                    except:
+                        continue
                     continue
-                except:
-                    continue
+                # except:
+                #     continue
             new_data = i[2] - 1
             db.cr.execute("UPDATE vip SET vip_time = ? WHERE user_id = ?", (new_data, i[0]))
             db.db.commit()
