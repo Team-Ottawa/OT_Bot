@@ -34,7 +34,7 @@ class PostCode(commands.Cog):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def js(self, ctx):
-        share = Share(self.client, 781903206762020904, "javascript", [
+        share = Share(self.client, 827135291570782248, "javascript", [
             'Write the code now without putting tags:',
             'Write the copyright:',
             'Write the code title:',
