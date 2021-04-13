@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import json
+import db
 
 
 with open('./config.json', 'r') as f:
@@ -56,6 +57,33 @@ class Mod(commands.Cog):
         )
 
         await ctx.send(embed=embed)
+
+    @commands.command(name='add', aliases=["acceptcode", "addcode"])
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def add_code(self, ctx, code_id):
+        date = db.get_code(code_id)
+        embed = discord.Embed(
+            title=f'code id: {date[0]}',
+            description=f"""
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+```{date[3][:2]}\n{date[6]}\n```
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+{self.client.get_emoji(761876595770130452)} **Title** : {date[1]}
+{self.client.get_emoji(761876609358757918)} **Description** : {date[2]}
+{self.client.get_emoji(761876608196804609)} **shared By** : {date[4]}
+{self.client.get_emoji(761876614761807883)} **copyrights** : {date[5]}
+{self.client.get_emoji(761876595006767104)} **language** : {date[3]}           
+""")
+        channel = 0
+        if date[3] == 'python':
+            channel = self.client.get_channel(781915117033357332)
+        elif date[3] == 'javascript':
+            channel = self.client.get_channel(827135291570782248)
+        elif date[3] == 'html':
+            channel = self.client.get_channel(814087413122072596)
+        await channel.send("<@&813514248142717011>", embed=embed, allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send('تم نشر الكود في {}'.format(channel.mention))
 
 
 def setup(client):

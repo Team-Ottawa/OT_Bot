@@ -36,22 +36,17 @@ class General(commands.Cog):
         if len(new_prefix) >= 5:
             await ctx.send("لا يمكنك وضع بادئه اكثر من 5 حرف")
             return
-        db.cr.execute("INSERT OR IGNORE INTO users(user_id, user_name) VALUES(?, ?)", (
-            ctx.author.id,
-            ctx.author.name))
-        db.cr.execute("UPDATE users SET prefix = ? WHERE user_id = ?", (new_prefix, ctx.author.id))
-        db.db.commit()
+        db.set_prefix(ctx.author, new_prefix)
         await ctx.send("حمبي البرفكس تبعك `{}`".format(new_prefix))
 
     @commands.command(help='to set your custom title')
     @commands.guild_only()
-    async def title(self, ctx, *, title):
+    async def title(self, ctx, *, title=None):
         if ctx.author.bot:
             return
         if len(title) > 100:
             await ctx.send("تقدر تحط اكثر شي ميه حرف")
-        db.cr.execute("UPDATE users SET description = ? WHERE user_id = ?", (title, ctx.author.id))
-        db.db.commit()
+        db.set_description(ctx.author, title)
         await ctx.message.add_reaction(self.client.get_emoji(771050418498306068))
 
     @commands.command(invoke_without_command=True, hidden=True)
@@ -103,7 +98,7 @@ class General(commands.Cog):
         embed.add_field(name='user id:', value=member.id, inline=True)
         embed.add_field(name='user name:', value=member.name, inline=True)
         embed.add_field(name='bag:', value=" | ".join(list_bag), inline=True)
-        embed.add_field(name='Thanks count:', value=f'`{db.get_thx(member)}` ✨', inline=True)
+        embed.add_field(name='Thanks count:', value=f'`{db.get_thanks(member)}` ✨', inline=True)
         embed.add_field(name='prefix:', value=f"`{db.get_prefix(member)}`", inline=True)
         embed.add_field(name='message count(xp):', value=f'`{db.get_xp(member)}`', inline=True)
         embed.add_field(name="description:", value=db.get_description(member))

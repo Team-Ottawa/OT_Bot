@@ -4,25 +4,13 @@ import asyncio
 import json
 import db
 import random
-
+import string
 with open('./config.json', 'r') as f:
     config = json.load(f)
 
 
-def get_code_id():
-    date = "qwertyuiopasdfghjklzxcvbnm_-1234567890"
-    data_ = db.cr.execute("SELECT * FROM vip").fetchall()
-    da = [i for i in data_]
-    id = ""
-
-    def gen_id(id):
-        while len(id) != 10:
-            value = random.choice(date)
-            id += value
-        return id
-    if gen_id in da:
-        gen_id(id)
-    return gen_id(id)
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 
 class PostCode(commands.Cog):
@@ -34,7 +22,7 @@ class PostCode(commands.Cog):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.has_any_role(config['coder_role_name'])
     async def js(self, ctx):
-        share = Share(self.client, 781903206762020904, "javascript", [
+        share = Share(self.client, 826883707465105408, "javascript", [
             'Write the code now without putting tags:',
             'Write the copyright:',
             'Write the code title:',
@@ -110,8 +98,9 @@ class Share:
             else:
                 answers.append(msg.content)
         if answers[4].lower() == 'yes':
+            id = id_generator()
             await ctx.author.send(embed=discord.Embed(
-                description='Your code has been shared with everyone',
+                description=f'Your code id: {id}, pls wait to accept.',
                 color=0xf7072b))
             embed = discord.Embed(description=f'''
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -124,10 +113,8 @@ class Share:
 {self.client.get_emoji(761876595006767104)} **language** : {self.type}
     ''')
             if mention:
-                await channel.send(ctx.guild.get_role(813514248142717011).mention, embed=embed)
-                db.cr.execute("INSERT OR IGNORE INTO codes(code_id, coder_id, code, type_code) VALUES(?, ?, ?, ?)", (
-                    get_code_id(), ctx.author.id, answers[0], self.type))
-                db.db.commit()
+                db.add_code(id, answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
+                await channel.send(f"{ctx.guild.get_role(805439358676369428).mention} | {id}", embed=embed)
                 return
             await channel.send(embed=embed)
             return

@@ -13,25 +13,25 @@ class Xp(commands.Cog):
             return
         if message.author.bot:
             return
-        db.cr.execute("UPDATE users SET xp = ? WHERE user_id = ?", (db.get_xp(message.author)+1, message.author.id))
-        db.db.commit()
-        if db.get_xp(message.author) == 500:
+        db.add_xp(message.author)
+        user_xp = db.get_xp(message.author)
+        if user_xp == 500:
             await message.channel.send(f"GG {message.author.mention}, your just send `500` messages ✨.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="500 messages"))
             return
-        elif db.get_xp(message.author) == 1000:
+        elif user_xp == 1000:
             await message.channel.send(f"GG {message.author.mention}, your just send `1000` messages ✨.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="1000 messages"))
             return
-        elif db.get_xp(message.author) == 2500:
+        elif user_xp == 2500:
             await message.channel.send(f"GG {message.author.mention}, your just send `2500` messages ✨.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="2500 messages"))
             return
-        elif db.get_xp(message.author) == 5000:
+        elif user_xp == 5000:
             await message.channel.send(f"GG {message.author.mention}, your just send `5000` messages its hack pro!! ✨.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="5000 messages"))
             return
-        elif db.get_xp(message.author) == 10000:
+        elif user_xp == 10000:
             await message.channel.send(f"GG {message.author.mention}, your just send `10000` messages your is fire!! 🔥.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="5000 messages"))
             return

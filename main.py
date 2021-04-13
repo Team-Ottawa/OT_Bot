@@ -3,16 +3,16 @@ from discord.ext import commands, tasks
 import json
 from prettytable import PrettyTable
 import asyncio
-import sqlite3
 import os
 import db
 
 
 def get_prefix(bot, msg):
     try:
-        prefix = db.cr.execute("SELECT prefix FROM users WHERE user_id = ?", (msg.author.id,))
-        return commands.when_mentioned_or(prefix.fetchone()[0])(bot, msg)
-    except TypeError:
+        prefix = db.get_prefix(msg.author)
+        print(f"{prefix}, {msg.author}")
+        return commands.when_mentioned_or(prefix)(bot, msg)
+    except:
         return commands.when_mentioned_or("!")(bot, msg)
 
 
@@ -79,10 +79,7 @@ class Bot(commands.Bot):
         print(self.owner_id)
         ottawa = self.get_guild(int(config['guild_id']))
         for i in ottawa.members:
-            db.cr.execute("INSERT OR IGNORE INTO users(user_id, user_name) VALUES(?, ?)", (
-                i.id,
-                i.name))
-            db.db.commit()
+            db.add_user(i)
         self.change_stats.start()
         tap = PrettyTable(
             ['Name Bot', 'Id', 'prefix', 'commands', 'users'])

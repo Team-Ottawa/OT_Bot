@@ -28,3 +28,17 @@ def get_description(user):
 def get_vip(user):
     vip_time = cr.execute("SELECT vip_time FROM vip WHERE user_id = ?", (user.id,))
     return vip_time.fetchone()[0]
+
+
+def get_thx(user):
+    thx_count = cr.execute("SELECT thanks FROM users WHERE user_id = ?", (user.id,))
+    return thx_count.fetchone()[0]
+
+
+def get_prefix(user):
+    prefix = db.execute("SELECT prefix FROM users WHERE user_id = ?", (user.id,))
+    return prefix.fetchone()[0]
+
+
+
+

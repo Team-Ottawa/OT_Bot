@@ -13,10 +13,7 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        db.cr.execute("INSERT OR IGNORE INTO users(user_id, user_name) VALUES(?, ?)", (
-            member.id,
-            member.name))
-        db.db.commit()
+        db.add_user(member)
         channel = self.client.get_channel(config['welcome_channel'])  # get channel
         guild = self.client.get_guild(654423706294026270)
         await channel.send("""
