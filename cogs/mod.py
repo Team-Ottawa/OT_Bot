@@ -71,7 +71,7 @@ class Mod(commands.Cog):
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 {self.client.get_emoji(761876595770130452)} **Title** : {date[1]}
 {self.client.get_emoji(761876609358757918)} **Description** : {date[2]}
-{self.client.get_emoji(761876608196804609)} **shared By** : {date[4]}
+{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(date[4])}
 {self.client.get_emoji(761876614761807883)} **copyrights** : {date[5]}
 {self.client.get_emoji(761876595006767104)} **language** : {date[3]}           
 """)
@@ -82,7 +82,10 @@ class Mod(commands.Cog):
             channel = self.client.get_channel(827135291570782248)
         elif date[3] == 'html':
             channel = self.client.get_channel(814087413122072596)
-        await channel.send("<@&813514248142717011>", embed=embed, allowed_mentions=discord.AllowedMentions.none())
+        msg = await channel.send("<@&813514248142717011>", embed=embed)
+        await msg.add_reaction(str(self.client.get_emoji(815537841319706654)))
+        await msg.add_reaction(str(self.client.get_emoji(815537927462453258)))
+        await channel.send('https://cdn.discordapp.com/attachments/804403574712565781/835966184997781544/42_E25EB2C-1.gif')
         await ctx.send('تم نشر الكود في {}'.format(channel.mention))
 
 

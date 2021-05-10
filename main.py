@@ -6,16 +6,6 @@ import asyncio
 import os
 import db
 
-
-def get_prefix(bot, msg):
-    try:
-        prefix = db.get_prefix(msg.author)
-        print(f"{prefix}, {msg.author}")
-        return commands.when_mentioned_or(prefix)(bot, msg)
-    except:
-        return commands.when_mentioned_or("!")(bot, msg)
-
-
 with open('./config.json', 'r') as f:
     config = json.load(f)
 
@@ -30,14 +20,15 @@ EXTENSIONS = [
     "errors",
     "help",
     "xp",
-    "vip"
+    "vip",
+    'dlel'
 ]
 
 
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=get_prefix,
+            command_prefix=commands.when_mentioned_or("!"),
             case_insensitive=True,
             allowed_mentions=discord.AllowedMentions(
                 everyone=config["mention"]["everyone"],
@@ -47,7 +38,7 @@ class Bot(commands.Bot):
     )
         self.remove_command('help')
         self.client_id = config["client_id"]
-        self.owner_id = config["owner_id"]
+        self.owner_ids = config["owner_id"]
 
         if config["token"] == "" or config["token"] == "token":
             self.token = os.environ['token']
@@ -76,10 +67,6 @@ class Bot(commands.Bot):
         await asyncio.sleep(10)
 
     async def on_ready(self):
-        print(self.owner_id)
-        ottawa = self.get_guild(int(config['guild_id']))
-        for i in ottawa.members:
-            db.add_user(i)
         self.change_stats.start()
         tap = PrettyTable(
             ['Name Bot', 'Id', 'prefix', 'commands', 'users'])

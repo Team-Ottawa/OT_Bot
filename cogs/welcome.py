@@ -15,7 +15,7 @@ class Welcome(commands.Cog):
     async def on_member_join(self, member):
         db.add_user(member)
         channel = self.client.get_channel(config['welcome_channel'])  # get channel
-        guild = self.client.get_guild(654423706294026270)
+        guild = self.client.get_guild(813850808650432552)
         await channel.send("""
 > Welcome {} to OTTAWA server, please go to <#813541018107772938> to learn how you can verified yourself!
 > You are the number member `{}`

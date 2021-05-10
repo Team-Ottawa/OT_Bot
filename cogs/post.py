@@ -47,7 +47,7 @@ class PostCode(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def post(self, ctx):
-        share = Share(self.client, 826883707465105408, "javascript", [
+        share = Share(self.client, 805777636168957992, "javascript", [
             'Write the code now without putting tags:',
             'Write the copyright:',
             'Write the code title:',
@@ -112,11 +112,10 @@ class Share:
 {self.client.get_emoji(761876614761807883)} **copyrights** : {answers[1]}
 {self.client.get_emoji(761876595006767104)} **language** : {self.type}
     ''')
-            if mention:
-                db.add_code(id, answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
-                await channel.send(f"{ctx.guild.get_role(805439358676369428).mention} | {id}", embed=embed)
-                return
-            await channel.send(embed=embed)
+            db.add_code(id, answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
+            if mention is False:
+                await channel.send(f"code DI: {id}", embed=embed)
+            await channel.send(f"{ctx.guild.get_role(805439358676369428).mention} | {id}", embed=embed)
             return
         elif answers[4].lower() == 'no':
             await ctx.author.send(embed=discord.Embed(

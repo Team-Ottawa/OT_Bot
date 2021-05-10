@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import time
 import db
+import random
 
 replay = {
     "صقر": "يا عمر صقر",
@@ -61,12 +62,18 @@ class General(commands.Cog):
     @commands.guild_only()
     async def profile(self, ctx, member: discord.Member = None):
         member = member if member else ctx.author
+        # print(f'name: {member.name}')
+        # print(f'bag: {" | ".join(list_bag)}')
+        # print(f'Thanks: {db.get_thanks(member)}')
+        # print(f'prefix: {db.get_prefix(member)}')
+        # print(f'xp: {db.get_xp(member)}')
+        # print(f'description: {db.get_description(member)}')
         if member.bot:
             await ctx.send("this user is bot 🙃.")
             return
         list_bag = []
         member_roles = [i.id for i in member.roles]
-        if member.id in self.client.owner_id:  # owner
+        if member.id in self.client.owner_ids:  # owner
             list_bag.append(str(self.client.get_emoji(826447166612570164)))
 
         if 804401761636319242 in member_roles:  # Helper
@@ -106,6 +113,25 @@ class General(commands.Cog):
         embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
         embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
         await ctx.send(embed=embed)
+
+    @commands.command(name='info')
+    @commands.guild_only()
+    async def info_code(self, ctx, code_id):
+        data = db.get_code(code_id)
+        if data is None:
+            await ctx.send('حمبي هاذ الكود مش موجود, لا توجع لي راسي خذ 🥕')
+            return
+        await ctx.message.add_reaction('⏳')
+        await ctx.message.reply(f"""
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+```{data[3][:2]}\n{data[6]}\n```
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+{self.client.get_emoji(761876595770130452)} **Title** : {data[1]}
+{self.client.get_emoji(761876609358757918)} **Description** : {data[2]}
+{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(data[4])}
+{self.client.get_emoji(761876614761807883)} **copyrights** : {data[5]}
+{self.client.get_emoji(761876595006767104)} **language** : {data[3]}           
+""", allowed_mentions=discord.AllowedMentions.none())
 
     @commands.Cog.listener()
     async def on_message(self, ctx):

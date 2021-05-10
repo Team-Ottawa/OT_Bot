@@ -58,7 +58,7 @@ class Vip(commands.Cog):
 
     @commands.command(name='setvip', aliases=["addvip"], hidden=True)
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def set_vip(self, ctx, user: discord.Member, time):
         db.set_vip(user, convert(time))
         await user.add_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
@@ -74,7 +74,7 @@ class Vip(commands.Cog):
 
     @commands.command(name='removevip', aliases=["revip"], hidden=True)
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def remove_vip(self, ctx, user: discord.Member):
         db.remove_vip(user.id)
         await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
@@ -87,6 +87,7 @@ class Vip(commands.Cog):
             user = self.client.get_guild(654423706294026270).get_member(i[0])
             if user is None:
                 db.remove_vip(i[0])
+                continue
             if i[1] <= 0:
                 db.remove_vip(user.id)
                 await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
