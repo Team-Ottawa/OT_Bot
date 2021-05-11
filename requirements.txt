@@ -7,3 +7,4 @@ arabic_reshaper
 mysql-connector-python~=8.0.23
 pymongo~=3.11.3
 requests~=2.25.1
+dnspython
