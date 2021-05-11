@@ -10,7 +10,6 @@ class Help(commands.Cog):
     @commands.command(name="help", help='show this message')
     @commands.guild_only()
     async def help_command(self, ctx, *, command=None):
-        # print(self.client.commands)
         if command is not None:
             command = self.client.get_command(command)
             if command is None:
@@ -18,20 +17,19 @@ class Help(commands.Cog):
             str_ = ""
             if command.aliases is not []:
                 str_ = f"**aliases:** {', '.join(command.aliases)}"
-            await ctx.send(f"**command:** {db.get_prefix(ctx.author)}{command.name} {command.signature}\n{str_}")
+            await ctx.send(f"**command:** !{command.name} {command.signature}\n{str_}")
             return
         list_commands = []
         for i in self.client.commands:
             if i.hidden:
                 continue
-            list_commands.append(f"**{db.get_prefix(ctx.author)}{i.name} {i.signature}** - {i.help}")
+            list_commands.append(f"**!{i.name} {i.signature}** - {i.help}")
         embed = discord.Embed(description="\n".join(list_commands), color=ctx.author.color)
         embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
         embed.set_image(url="https://cdn.discordapp.com/attachments/770235184477634590/827052493224935454/fe4f45f31647abe2.png")
         embed.set_author(name=self.client.user.display_name + " [✓BOT]", icon_url=self.client.user.avatar_url)
         await ctx.send(embed=embed)
-        # await ctx.send(embed=discord.Embed(description="\n".join([f"**{db.get_prefix(ctx.author)}{i.name} {i.signature}**" for i in self.client.commands])))
 
 
 def setup(client):

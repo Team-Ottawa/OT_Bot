@@ -13,9 +13,22 @@ class Xp(commands.Cog):
             return
         if message.author.bot:
             return
-        db.add_xp(message.author)
-        user_xp = db.get_xp(message.author)
-        if user_xp == 500:
+        x = db.DatabaseUsers(self.client, message.author.id)
+        x.update_xp()
+        user_xp = x.info.get("xp")
+        if user_xp == 25:
+            await message.channel.send(f"GG {message.author.mention}, your just send `25` messages ✨.")
+            return
+        elif user_xp == 50:
+            await message.channel.send(f"GG {message.author.mention}, your just send `50` messages ✨.")
+            return
+        elif user_xp == 100:
+            await message.channel.send(f"GG {message.author.mention}, your just send `100` messages ✨.")
+            return
+        elif user_xp == 250:
+            await message.channel.send(f"GG {message.author.mention}, your just send `250` messages ✨.")
+            return
+        elif user_xp == 500:
             await message.channel.send(f"GG {message.author.mention}, your just send `500` messages ✨.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="500 messages"))
             return

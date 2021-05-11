@@ -1,158 +1,124 @@
-import mysql.connector
-import discord
+import pymongo
+from datetime import datetime
+import requests
 
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database='ottawa'
-)
+db_client = pymongo.MongoClient("mongodb+srv://ottawa:IT7GyTLDPsEMcCOC@test.yvxou.mongodb.net/test")
+db = db_client['ottawa']
+col_users = db["user"]
+col_codes = db["codes"]
+col_vip = db["vip"]
 
 
-cr = db.cursor(buffered=True)
+class DatabaseUsers:
+    def __init__(self, client, _id: int):
+        self.id = _id
+        self.client = client
+
+    def insert(self):
+        json = {
+            "_id": self.id,
+            "name": str(self.client.get_user(self.id)),
+            "thanks": 0,
+            "xp": 0,
+            "description": None
+        }
+        try:
+            x = col_users.insert_one(json)
+            return x
+        except Exception as error:
+            return error
+
+    @property
+    def info(self):
+        x = col_users.find_one({"_id": self.id})
+        return x
+
+    def update_xp(self):
+        old_xp = self.info.get("xp")
+        col_users.update_one({"_id": self.id}, {"$set": {"xp": old_xp+1}})
+
+    def update_where(self, module: str, new_value):
+        col_users.update_one({"_id": self.id}, {"$set": {module: new_value}})
 
 
-cr.execute("""
-CREATE TABLE IF NOT EXISTS users(
-id BIGINT(30) PRIMARY KEY,
-name VARCHAR(30) DEFAULT NULL,
-prefix TEXT,
-thanks INT DEFAULT 0,
-xp INT(255) DEFAULT 0,
-description VARCHAR(101)
-)
-""")
+class DatabaseCodes:
+    def __init__(self, client, code_id: str):
+        self.code_id = code_id
+        self.client = client
+
+    @property
+    def info(self):
+        x = col_codes.find_one({"_id": self.code_id})
+        return x
+
+    def insert(self, title, description, type, author_id, copyrights, code):
+        json = {
+            "_id": self.code_id,
+            "title": title,
+            "description": description,
+            "type": type,
+            "author_id": author_id,
+            "copyrights": copyrights,
+            "code": code,
+            "data": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+            "link": self._create_link(title, type, code)
+        }
+        try:
+            x = col_codes.insert_one(json)
+            return x
+        except Exception as error:
+            return error
+
+    @staticmethod
+    def _create_link(title, type, code):
+        json = {
+            "api_dev_key": "blY19Lnbi1K4aI-0-IMMCtK4Fdn5lfzz",
+            "api_paste_code": "%s\n# Copyright (c) 2021 OTTAWA server\n# Discord: https://discord.gg/sUZ2W8FDKr\n# Note: this auto paste," % code,
+            "api_paste_private": "0",
+            "api_paste_name": title,
+            "api_paste_format": type,
+            "api_user_key": "",
+            "api_option": "paste"
+        }
+        x = requests.post("https://pastebin.com/api/api_post.php", data=json)
+        return x.content.decode("utf-8")
 
 
-cr.execute("""
-CREATE TABLE IF NOT EXISTS vip(
-id BIGINT(30) PRIMARY KEY,
-timer BIGINT(255)
-)
-""")
+class DatabaseVip:
+    def __init__(self, client, _id: int = None):
+        self.id = _id
+        self.client = client
 
+    def insert(self, ctx, time_str, time: int, end_at):
+        json = {
+            "_id": self.id,
+            "name": str(self.client.get_user(self.id)),
+            "add_by": ctx.author.id,
+            "time_str": time_str,
+            "time": time,
+            "end_at": end_at
+        }
+        try:
+            x = col_vip.insert_one(json)
+        except:
+            old_time = self.info.get("time")
+            col_vip.update_one({"_id": self.id}, {"$set": {"time": old_time + time}})
 
-cr.execute("""
-CREATE TABLE IF NOT EXISTS codes(
-id VARCHAR(6) PRIMARY KEY,
-title VARCHAR(30) NOT NULL,
-description VARCHAR(255) NOT NULL,
-type TEXT NOT NULL,
-author BIGINT(30) NOT NULL,
-code LONGTEXT NOT NULL 
-)
-""")
+    @property
+    def info(self):
+        x = col_vip.find_one({"_id": self.id})
+        return x
 
-cr.execute("""
-CREATE TABLE IF NOT EXISTS dlel(
-id BIGINT(30) PRIMARY KEY,
-name VARCHAR(30) DEFAULT NULL,
-attachments VARCHAR(101) NOT NULL
-)
-""")
+    def update_time(self):
+        old_time = self.info.get("time")
+        col_vip.update_one({"_id": self.id}, {"$set": {"time": old_time - 2}})
 
+    def delete_vip(self):
+        col_vip.delete_one({"_id": self.id})
 
-def get_prefix(user):
-    cr.execute("SELECT prefix FROM users WHERE id = %s", (user.id,))
-    return cr.fetchone()[0]
+    @property
+    def all(self):
+        return col_vip.find()
 
-
-def get_thanks(user):
-    cr.execute("SELECT thanks FROM users WHERE id = %s", (user.id,))
-    return cr.fetchone()[0]
-
-
-def get_xp(user):
-    cr.execute("SELECT xp FROM users WHERE id = %s", (user.id,))
-    return cr.fetchone()[0]
-
-
-def get_description(user):
-    cr.execute("SELECT description FROM users WHERE id = %s", (user.id,))
-    return cr.fetchone()[0]
-
-
-def add_thanks(user, thanks_count=1):
-    cr.execute('UPDATE users SET xp = %s WHERE id = %s', (get_thanks(user)+thanks_count, user.id))
-    db.commit()
-
-
-def set_description(user, new_title):
-    cr.execute('UPDATE users SET description = %s WHERE id = %s', (new_title, user.id))
-    db.commit()
-
-
-def add_xp(user, xp_count=1):
-    cr.execute('UPDATE users SET xp = %s WHERE id = %s', (get_xp(user)+xp_count, user.id))
-    db.commit()
-
-
-def set_prefix(user, prefix):
-    cr.execute('UPDATE users SET prefix = %s WHERE id = %s', (prefix, user.id))
-    db.commit()
-
-
-def add_user(user):
-    try:
-        cr.execute('INSERT INTO users(id, name) VALUES(%s, %s)', (user.id, user.name))
-        db.commit()
-    except mysql.connector.errors.IntegrityError:
-        pass
-
-
-def get_vip(user):
-    cr.execute("SELECT timer FROM vip WHERE id = %s", (user.id,))
-    return cr.fetchone()[0]
-
-
-def get_all_vip():
-    cr.execute('SELECT * FROM vip')
-    return cr.fetchall()
-
-
-def set_vip(user, time: int):
-    try:
-        cr.execute('INSERT INTO vip(id, timer) VALUES(%s, %s)', (user.id, time))
-        db.commit()
-    except mysql.connector.errors.IntegrityError:
-        cr.execute('UPDATE vip SET timer = %s WHERE id = %s', (get_vip(user)+time, user.id))
-
-
-def remove_vip(user_id):
-    cr.execute('UPDATE vip SET timer = %s WHERE id = %s', (0, user_id))
-    db.commit()
-
-
-def edit_vip(user, num=1):
-    cr.execute('UPDATE vip SET timer = %s WHERE id = %s', (get_vip(user)-num, user.id))
-    db.commit()
-
-
-def add_code(id, title, description, type, author, copyrights, code):
-    cr.execute('INSERT INTO codes(id, title, description, type, author, copyrights, code) VALUES(%s, %s, %s, %s, %s, %s, %s)', (
-        id, title, description, type, author, copyrights, code
-    ))
-    db.commit()
-
-
-def get_code(id):
-    cr.execute('SELECT * FROM codes WHERE id = %s', (id,))
-    return cr.fetchone()
-
-
-def get_dlel(user: discord.Member):
-    cr.execute('SELECT * FROM dlel WHERE id = %s', (user.id,))
-    return cr.fetchone()
-
-
-def add_dlel(user: discord.Member, attachments, data):
-    cr.execute('INSERT INTO dlel(id, name, attachments, data) VALUES(%s, %s, %s, %s)', (
-        user.id, user.name, attachments, data))
-    db.commit()
-
-
-def delete_all_dlel():
-    cr.execute('DELETE FROM dlel')
-    db.commit()
 

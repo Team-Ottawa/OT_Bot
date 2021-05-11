@@ -112,7 +112,8 @@ class Share:
 {self.client.get_emoji(761876614761807883)} **copyrights** : {answers[1]}
 {self.client.get_emoji(761876595006767104)} **language** : {self.type}
     ''')
-            db.add_code(id, answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
+            x = db.DatabaseCodes(self.client, id)
+            x.insert(answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
             if mention is False:
                 await channel.send(f"code DI: {id}", embed=embed)
             await channel.send(f"{ctx.guild.get_role(805439358676369428).mention} | {id}", embed=embed)

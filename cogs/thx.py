@@ -22,13 +22,13 @@ class Thx(commands.Cog):
         if user.bot:
             await ctx.send("this user is bot 🙃.")
             return
-        thanks = db.get_thx(user)
-        db.cr.execute("UPDATE users SET thanks = ? WHERE user_id = ?", (thanks+1, user.id))
-        db.db.commit()
-        await ctx.send(f"done thanks {user.mention}, thx count is `{db.get_thx(user)}`")
+        x = db.DatabaseUsers(self.client, user.id)
+        old_thanks = x.info.get("xp")
+        x.update_where("thanks", old_thanks+1)
+        await ctx.send(f"done thanks {user.mention}, thx count is `{old_thanks+1}`")
         channel = self.client.get_channel(826883667925663794)
         await channel.send(embed=discord.Embed(
-            description=f"**By:** {ctx.author.mention}\n**To:** {user.mention}\n**thanks count**: {thanks+1}",
+            description=f"**By:** {ctx.author.mention}\n**To:** {user.mention}\n**thanks count**: {old_thanks+1}",
             color=discord.Color.green()
         ))
         list_.append(ctx.author.id)

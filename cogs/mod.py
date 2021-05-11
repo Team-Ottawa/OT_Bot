@@ -12,32 +12,32 @@ class Mod(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(hidden=True)
-    @commands.guild_only()
-    @commands.has_permissions(administrator=True)
-    async def accept(self, ctx, member: discord.Member):
-        await ctx.send(embed=discord.Embed(
-            description="✅ Done been accepted successfully",
-            color=0x03ff74
-        ))
-        # await member.add_roles(discord.utils.get(member.guild.roles, name="Helperᵒᵗ"))
-        await member.send(embed=discord.Embed(
-            description="✅ You have been accepted successfully",
-            color=0x03ff74
-        ))
-
-    @commands.command(hidden=True)
-    @commands.guild_only()
-    @commands.has_permissions(administrator=True)
-    async def reject(self, ctx, member: discord.Member, *, reason):
-        await ctx.send(embed=discord.Embed(
-            description=f"✅ Done been Unfortunately for {member.mention}",
-            color=0x03ff74
-        ))
-        await member.send(embed=discord.Embed(
-            description=f"❌ You have Unfortunately, you were rejected because of:\n{reason}\nIf you have any objections, please contact {ctx.author}",
-            color=0xf7072b
-        ))
+    # @commands.command(hidden=True)
+    # @commands.guild_only()
+    # @commands.has_permissions(administrator=True)
+    # async def accept(self, ctx, member: discord.Member):
+    #     await ctx.send(embed=discord.Embed(
+    #         description="✅ Done been accepted successfully",
+    #         color=0x03ff74
+    #     ))
+    #     # await member.add_roles(discord.utils.get(member.guild.roles, name="Helperᵒᵗ"))
+    #     await member.send(embed=discord.Embed(
+    #         description="✅ You have been accepted successfully",
+    #         color=0x03ff74
+    #     ))
+    #
+    # @commands.command(hidden=True)
+    # @commands.guild_only()
+    # @commands.has_permissions(administrator=True)
+    # async def reject(self, ctx, member: discord.Member, *, reason):
+    #     await ctx.send(embed=discord.Embed(
+    #         description=f"✅ Done been Unfortunately for {member.mention}",
+    #         color=0x03ff74
+    #     ))
+    #     await member.send(embed=discord.Embed(
+    #         description=f"❌ You have Unfortunately, you were rejected because of:\n{reason}\nIf you have any objections, please contact {ctx.author}",
+    #         color=0xf7072b
+    #     ))
 
     @commands.command(hidden=True)
     @commands.guild_only()
@@ -58,29 +58,36 @@ class Mod(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='add', aliases=["acceptcode", "addcode"])
+    @commands.command(name='add', aliases=["acceptcode", "addcode"], hidden=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def add_code(self, ctx, code_id):
-        date = db.get_code(code_id)
+        x = db.DatabaseCodes(self.client, code_id)
+        data = x.info
+        if data is None:
+            await ctx.send('حمبي هاذ الكود مش موجود, لا توجع لي راسي خذ 🥕')
+            return
         embed = discord.Embed(
-            title=f'code id: {date[0]}',
+            title=f'code id: {data.get("_id")}',
             description=f"""
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```{date[3][:2]}\n{date[6]}\n```
+```{data.get("type")[:2]}\n{data.get("code")}\n```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-{self.client.get_emoji(761876595770130452)} **Title** : {date[1]}
-{self.client.get_emoji(761876609358757918)} **Description** : {date[2]}
-{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(date[4])}
-{self.client.get_emoji(761876614761807883)} **copyrights** : {date[5]}
-{self.client.get_emoji(761876595006767104)} **language** : {date[3]}           
+{self.client.get_emoji(761876595770130452)} **Title** : {data.get("title")}
+{self.client.get_emoji(761876609358757918)} **Description** : {data.get("description")}
+{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
+{self.client.get_emoji(761876614761807883)} **copyrights** : {data.get("copyrights")}
+{self.client.get_emoji(761876595006767104)} **language** : {data.get("type")}
+⏳ **Add At:** {data.get("data")}
+**[Pastebin]({data.get("link")}) | [Discord](https://discord.gg/sUZ2W8FDKr) | [Programming](https://discord.com/channels/@me/{data.get("author_id")})**
 """)
         channel = 0
-        if date[3] == 'python':
+        type_ = data.get("type")
+        if type_ == 'python':
             channel = self.client.get_channel(781915117033357332)
-        elif date[3] == 'javascript':
+        elif type_ == 'javascript':
             channel = self.client.get_channel(827135291570782248)
-        elif date[3] == 'html':
+        elif type_ == 'html':
             channel = self.client.get_channel(814087413122072596)
         msg = await channel.send("<@&813514248142717011>", embed=embed)
         await msg.add_reaction(str(self.client.get_emoji(815537841319706654)))

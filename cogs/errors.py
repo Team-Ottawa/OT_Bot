@@ -10,7 +10,6 @@ class ErrorHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        user = ctx.author
         if isinstance(error, commands.CommandOnCooldown):
             m, s = divmod(error.retry_after, 60)
             await ctx.send(embed=discord.Embed(
@@ -29,14 +28,14 @@ class ErrorHandler(commands.Cog):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
             embed = discord.Embed(
-                description=f"{db.get_prefix(user)}{ctx.command.name} {ctx.command.signature}",
+                description=f"!{ctx.command.name} {ctx.command.signature}",
                 color=discord.Colour.red()
             ).set_author(name=ctx.command.cog_name)
             await ctx.send(embed=embed)
             return
         elif isinstance(error, commands.errors.BadArgument):
             embed = discord.Embed(
-                description=f"{db.get_prefix(user)}{ctx.command.name} {ctx.command.signature}",
+                description=f"!{ctx.command.name} {ctx.command.signature}",
                 color=discord.Colour.red()
             ).set_author(name=ctx.command.cog_name)
             await ctx.send(embed=embed)
