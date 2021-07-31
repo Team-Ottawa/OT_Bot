@@ -1,0 +1,16 @@
+{
+    "token": "Nzk5MzYzMjc5NTk1NTAzNjU3.YACfEQ.QDjXoSQ_3X1_QiOZHUuo0wd8ImE",
+    "prefix": "!",
+    "guild_id": "654423706294026270",
+    "client_id": 799363279595503657,
+    "owner_id": [739232997232082944, 457213581369540619, 716783245387235410, 496996678088392725, 386247167532072971],
+    "submit_channel": 805775997941186580,
+    "coder_role_name": "Coder",
+    "mention_code_role": 813514248142717011,
+    "welcome_channel": 813784682138173482,
+    "mention": {
+        "everyone": true,
+        "users": true,
+        "roles": true
+    }
+}
