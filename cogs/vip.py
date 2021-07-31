@@ -43,6 +43,10 @@ intervals = (
     ('seconds', 1),
 )
 
+role_vip = 844113347992485928
+log_channel = 851033719707140106
+guild_id = 843865725886398554
+
 
 def display_time(seconds, granularity=2):
     result = []
@@ -80,13 +84,12 @@ class Vip(commands.Cog):
     @commands.is_owner()
     async def set_vip(self, ctx, user: discord.Member, time):
         x = db.DatabaseVip(self.client, user.id)
-        end_at = int(datetime.timestamp(datetime.now()) + convert(time))
-        timestamp = datetime.fromtimestamp(end_at)
-        print(timestamp)
-        x.insert(ctx, time, convert(time), timestamp)
-        await user.add_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
+        end_at = datetime.now().timestamp() + convert(time)
+        print(end_at)
+        x.insert(ctx.author, end_at)
+        await user.add_roles(ctx.guild.get_role(role_vip))
         await ctx.send(f"done add vip to {user.mention}, {time}")
-        vip_log = self.client.get_channel(826863222510190614)
+        vip_log = self.client.get_channel(log_channel)
         embed = discord.Embed(
             title="new vip",
             description=f"**User:** {user} | {user.id}\n**Data:** {time}\n**By:** {ctx.author.mention}",
@@ -102,8 +105,8 @@ class Vip(commands.Cog):
         x = db.DatabaseVip(self.client, user.id)
         info = x.info
         x.delete_vip()
-        await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
-        await self.client.get_channel(826863222510190614).send(embed=discord.Embed(
+        await user.remove_roles(ctx.guild.get_role(role_vip))
+        await self.client.get_channel(log_channel).send(embed=discord.Embed(
             title="remove vip",
             description=f"**User:** %s\n**Add By:** %s\n**Time:** %s\n**Remove By:** %s" % (
                 user.mention,
@@ -115,26 +118,23 @@ class Vip(commands.Cog):
         ))
         await ctx.send(f"done remove vip to {user.mention}")
 
-    @tasks.loop(seconds=2)
+    @tasks.loop(seconds=10)
     async def vip(self):
-        x = db.DatabaseVip(self.client)
-        data = x.all
-        for i in data:
+        for i in db.get_all_vip():
             _x = db.DatabaseVip(self.client, i.get("_id"))
-            _x.update_time()
-            user = self.client.get_guild(654423706294026270).get_member(i.get("_id"))
+            user = self.client.get_guild(guild_id).get_member(i.get("_id"))
             if user is None:
                 _x.delete_vip()
                 continue
-            if i.get("time") <= 0:
+            if (i.get("time") - datetime.now().timestamp()) <= 0:
                 _x.delete_vip()
-                await user.remove_roles(self.client.get_guild(654423706294026270).get_role(811547143806255134))
-                await self.client.get_channel(826863222510190614).send(embed=discord.Embed(
+                await user.remove_roles(self.client.get_guild(guild_id).get_role(role_vip))
+                await self.client.get_channel(log_channel).send(embed=discord.Embed(
                     title="end vip",
                     description=f"**User:** %s\n**Add By:** %s\n**Time:** %s" % (
                         user.mention,
                         await self.client.fetch_user(i.get("add_by")),
-                        i.get("time_str")
+                        datetime.fromtimestamp(_x.info.get("time"))
                     ),
                     color=discord.Color.red(),
                 ))

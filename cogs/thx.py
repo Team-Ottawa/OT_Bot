@@ -23,12 +23,12 @@ class Thx(commands.Cog):
             await ctx.send("this user is bot 🙃.")
             return
         x = db.DatabaseUsers(self.client, user.id)
-        old_thanks = x.info.get("xp")
-        x.update_where("thanks", old_thanks+1)
-        await ctx.send(f"done thanks {user.mention}, thx count is `{old_thanks+1}`")
-        channel = self.client.get_channel(826883667925663794)
+        old_thanks = x.info.get("thanks")
+        x.update_where("thanks", int(old_thanks)+1)
+        await ctx.send(f"done thanks {user.mention}, thx count is `{int(old_thanks)+1}`")
+        channel = self.client.get_channel(851033719707140106)
         await channel.send(embed=discord.Embed(
-            description=f"**By:** {ctx.author.mention}\n**To:** {user.mention}\n**thanks count**: {old_thanks+1}",
+            description=f"**By:** {ctx.author.mention}\n**To:** {user.mention}\n**thanks count**: {int(old_thanks)+1}",
             color=discord.Color.green()
         ))
         list_.append(ctx.author.id)

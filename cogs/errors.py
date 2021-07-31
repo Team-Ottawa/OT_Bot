@@ -1,12 +1,11 @@
 import discord
 from discord.ext import commands
-import db
+import config
 
 
 class ErrorHandler(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.cooldown = []
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -28,20 +27,30 @@ class ErrorHandler(commands.Cog):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
             embed = discord.Embed(
-                description=f"!{ctx.command.name} {ctx.command.signature}",
+                description=f"{config.prefix}{ctx.command.name} {ctx.command.signature}",
                 color=discord.Colour.red()
             ).set_author(name=ctx.command.cog_name)
             await ctx.send(embed=embed)
             return
         elif isinstance(error, commands.errors.BadArgument):
             embed = discord.Embed(
-                description=f"!{ctx.command.name} {ctx.command.signature}",
+                description=f"{config.prefix}{ctx.command.name} {ctx.command.signature}",
                 color=discord.Colour.red()
             ).set_author(name=ctx.command.cog_name)
             await ctx.send(embed=embed)
             return
         elif isinstance(error, commands.errors.MissingPermissions):
-            await ctx.send(error)
+            await ctx.send("Missing permissions `%s`" % error.missing_perms)
+            return
+        elif isinstance(error, commands.errors.BotMissingPermissions):
+            await ctx.send("I Missing permissions `%s`" % error.missing_perms)
+        elif isinstance(error, commands.errors.CommandNotFound):
+            return
+        elif isinstance(error, commands.errors.MissingRole):
+            await ctx.send("Missing role `%s`" % error.missing_role)
+            return
+        if isinstance(error, discord.errors.NotFound):
+            return
         else:
             await ctx.send(error)
 

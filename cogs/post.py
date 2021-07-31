@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
 import asyncio
-import json
+import config
 import db
 import random
 import string
-with open('./config.json', 'r') as f:
-    config = json.load(f)
+from discord.utils import get
+from datetime import datetime
+import datetime
 
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -17,43 +18,49 @@ class PostCode(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(hidden=True)
-    @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.user)
-    @commands.has_any_role(config['coder_role_name'])
-    async def js(self, ctx):
-        share = Share(self.client, 826883707465105408, "javascript", [
-            'Write the code now without putting tags:',
-            'Write the copyright:',
-            'Write the code title:',
-            'Write the code description:',
-            'Confirm Code Share (Yes / No):'])
-        await share.share(ctx, mention=True)
-
-    @commands.command(hidden=True)
-    @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.user)
-    @commands.has_any_role(config['coder_role_name'])
-    async def py(self, ctx):
-        share = Share(self.client, 826883707465105408, "python", [
-            'Write the code now without putting tags:',
-            'Write the copyright:',
-            'Write the code title:',
-            'Write the code description:',
-            'Confirm Code Share (Yes / No):'])
-        await share.share(ctx, mention=True)
-
     @commands.command(help='post your code')
     @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def post(self, ctx):
-        share = Share(self.client, 805777636168957992, "javascript", [
-            'Write the code now without putting tags:',
-            'Write the copyright:',
-            'Write the code title:',
-            'Write the code description:',
-            'Confirm Code Share (Yes / No):'])
-        await share.share(ctx, mention=False)
+        if ctx.author.bot:
+            return
+        questions = [
+            ':one: |  \`\`\` اكتب الكود بدون علامات',
+            ':two: | اكتب حقوق مالك الكود:',
+            ':three: | اكتب عنوان الكود:',
+            ':four: | اكتب وصف مفصل عن الكود:',
+            ':five: | هل انت موافق على نشر الكود (Yes or No):'
+        ]
+        x = 3
+        if config.coder_role_id in [i.id for i in ctx.author.roles]:
+            def check(m):
+                return m.author == ctx.author and m.channel == ctx.channel and m.content in ['1', '2', '3']
+
+            embed = discord.Embed(
+                title='اختار نوع نشر الكود حسب الرقم:',
+                color=0xFF0000,
+                description=
+                "**[ 1 ]** : JavaScript code post\n**[ 2 ]** : Python code post\n**[ 3 ]** : Normal post"
+            )
+            embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+            embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
+            embed.set_thumbnail(url=ctx.guild.icon_url)
+            m = await ctx.send(embed=embed)
+            try:
+                message = await self.client.wait_for("message", timeout=180.0, check=check)
+            except asyncio.TimeoutError:
+                await m.delete()
+                return
+            x = int(message.content)
+        if x == 1:
+            share = Share(self.client, 870796766746906654, "javascript", questions)
+            await share.share(ctx, mention=True)
+        elif x == 2:
+            share = Share(self.client, 870796766746906654, "python", questions)
+            await share.share(ctx, mention=True)
+        elif x == 3:
+            share = Share(self.client, 861306905061621771, "javascript", questions)
+            await share.share(ctx, mention=False)
 
 
 def setup(client):
@@ -68,11 +75,6 @@ class Share:
         self.type = type
 
     async def share(self, ctx, mention=False):
-        channels = [811002423303995442, 813533585646551041, 810949112433213450, 813851049722511390]
-        if ctx.channel.id not in channels:
-            return
-        if ctx.author.bot:
-            return
         channel = self.client.get_channel(self.channel)  # id channel
         answers = []
         await ctx.author.send(embed=discord.Embed(
@@ -99,24 +101,31 @@ class Share:
                 answers.append(msg.content)
         if answers[4].lower() == 'yes':
             id = id_generator()
+            x = db.DatabaseCodes(self.client, id)
+            x.insert(answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
+            data = x.info
             await ctx.author.send(embed=discord.Embed(
                 description=f'Your code id: {id}, pls wait to accept.',
                 color=0xf7072b))
-            embed = discord.Embed(description=f'''
+
+            embed = discord.Embed(
+                title=f'code id: {data.get("_id")}',
+                description=f"""
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```{self.type[:2]}\n{answers[0]}\n```
+```{data.get("type")[:2]}\n{data.get("code")}\n```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-{self.client.get_emoji(761876595770130452)} **codes** : {answers[2]}
-{self.client.get_emoji(761876609358757918)} **Description** : {answers[3]}
-{self.client.get_emoji(761876608196804609)} **shared By** : {ctx.author.mention}
-{self.client.get_emoji(761876614761807883)} **copyrights** : {answers[1]}
-{self.client.get_emoji(761876595006767104)} **language** : {self.type}
-    ''')
-            x = db.DatabaseCodes(self.client, id)
-            x.insert(answers[2], answers[3], self.type, ctx.author.id, answers[1], answers[0])
+{self.client.get_emoji(761876595770130452)} **Title** : {data.get("title")}
+{self.client.get_emoji(761876609358757918)} **Description** : {data.get("description")}
+{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
+{self.client.get_emoji(761876614761807883)} **copyrights** : {data.get("copyrights")}
+{self.client.get_emoji(761876595006767104)} **language** : {data.get("type")}
+⏳ **Add At:** {data.get("data")}
+**[Pastebin]({data.get("link")}) | [Discord](https://discord.gg/Q5pd2veeH7) | [Programming](https://discord.com/channels/@me/{data.get("author_id")})**
+            """)
             if mention is False:
                 await channel.send(f"code DI: {id}", embed=embed)
-            await channel.send(f"{ctx.guild.get_role(805439358676369428).mention} | {id}", embed=embed)
+                return
+            await channel.send(f"{ctx.guild.get_role(843871660625231902).mention} | {id}", embed=embed)
             return
         elif answers[4].lower() == 'no':
             await ctx.author.send(embed=discord.Embed(

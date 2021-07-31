@@ -1,6 +1,7 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import db
+import config
 
 
 class Xp(commands.Cog):
@@ -48,6 +49,158 @@ class Xp(commands.Cog):
             await message.channel.send(f"GG {message.author.mention}, your just send `10000` messages your is fire!! 🔥.")
             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name="5000 messages"))
             return
+
+    @tasks.loop(minutes=1)
+    async def voice_xp(self):
+        guild = self.client.get_guild(config.guild_id)
+        for channel in guild.voice_channels:
+            for member in channel.members:
+                if member.bot:
+                    continue
+                _id = member.id
+                x = db.DatabaseUsers(self.client, _id)
+                _info = x.info
+                x.update_where("voice_xp", _info.get("voice_xp")+2)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.voice_xp.start()
+
+    @commands.group(name='top', invoke_without_command=True, help='Get leaderboards from the server')
+    @commands.guild_only()
+    async def top_(self, ctx):
+        top_xp = ""
+        top_thanks = ""
+        top_voice = ""
+        x = db.DatabaseUsers(self.client, ctx.author.id)
+        for z, i in enumerate(x.top_xp(count=5)):
+            if i.get("_id") == ctx.author.id:
+                top_xp += "**#%s | <@%s> XP: `%s`**\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("xp")
+                )
+                continue
+            top_xp += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("xp")
+            )
+        for z, i in enumerate(x.top_thanks(count=5)):
+            if i.get("_id") == ctx.author.id:
+                top_thanks += "**#%s | <@%s> XP: `%s`**\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("thanks")
+                )
+                continue
+            top_thanks += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("thanks")
+            )
+        for z, i in enumerate(x.top_voice(count=5)):
+            if i.get("_id") == ctx.author.id:
+                top_voice += "**#%s |** <@%s> XP: `%s`\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("voice_xp")
+                )
+                continue
+            top_voice += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("voice_xp")
+            )
+        embed = discord.Embed(
+            title="Ottawa Top Leaderboards",
+            color=0xFFFDFD
+        )
+        embed.add_field(name='💬 top xp', value=top_xp + "✨ More? `#top xp`", inline=True)
+        embed.add_field(name='🌟 top thanks', value=top_thanks + "✨ More? `#top thanks`", inline=True)
+        embed.add_field(name='🔊 top voice', value=top_voice + "✨ More? `#top voice`", inline=False)
+        await ctx.send(embed=embed)
+
+    @top_.command(name="voice", aliases=['vc'])
+    @commands.guild_only()
+    async def top_voice(self, ctx, page_id: int = 1):
+        x = db.DatabaseUsers(self.client, ctx.author.id)
+        v = x.get_from_page_id(module='voice_xp', page_id=page_id)
+        top_voice = ""
+        for z, i in enumerate(v):
+            if i.get("_id") == ctx.author.id:
+                top_voice += "**#%s | <@%s> XP: `%s`**\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("voice_xp")
+                )
+                continue
+            top_voice += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("voice_xp")
+            )
+        embed = discord.Embed(
+            title="Ottawa Top Voice Leaderboards",
+            color=0xFFFDFD
+        )
+        embed.add_field(name='🔊 top voice [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)), value=top_voice, inline=True)
+        await ctx.send(embed=embed)
+
+    @top_.command(name="text", aliases=['xp', 'message'])
+    @commands.guild_only()
+    async def top_text(self, ctx, page_id: int = 1):
+        top_xp = ""
+        x = db.DatabaseUsers(self.client, ctx.author.id)
+        v = x.get_from_page_id(module='xp', page_id=page_id)
+        for z, i in enumerate(v):
+            if i.get("_id") == ctx.author.id:
+                top_xp += "**#%s | <@%s> XP: `%s`**\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("xp")
+                )
+                continue
+            top_xp += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("xp")
+            )
+        embed = discord.Embed(
+            title="Ottawa Top Text Leaderboards",
+            color=0xFFFDFD
+        )
+        embed.add_field(name='💬 top xp [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)), value=top_xp, inline=True)
+        await ctx.send(embed=embed)
+
+    @top_.command(name="thanks", aliases=['thank', 'thx'])
+    @commands.guild_only()
+    async def top_thanks(self, ctx, page_id: int = 1):
+        top_thanks = ""
+        x = db.DatabaseUsers(self.client, ctx.author.id)
+        v = x.get_from_page_id(module='thanks', page_id=page_id)
+        for z, i in enumerate(v):
+            if i.get("_id") == ctx.author.id:
+                top_thanks += "**#%s | <@%s> XP: `%s`**\n" % (
+                    i.get("num"),
+                    i.get('_id'),
+                    i.get("thanks")
+                )
+                continue
+            top_thanks += "#%s | <@%s> XP: `%s`\n" % (
+                i.get("num"),
+                i.get('_id'),
+                i.get("thanks")
+            )
+        embed = discord.Embed(
+            title="Ottawa Top Thanks Leaderboards",
+            color=0xFFFDFD
+        )
+        embed.add_field(
+            name='🌟 top thanks [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)),
+            value=top_thanks, inline=True
+        )
+        await ctx.send(embed=embed)
 
 
 def setup(client):

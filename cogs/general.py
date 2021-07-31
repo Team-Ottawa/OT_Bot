@@ -2,15 +2,14 @@ import discord
 from discord.ext import commands
 import time
 import db
-import random
 
 replay = {
     "صقر": "يا عمر صقر",
     "حازم": "اسطوره البايثون عطه لكزز",
     "بترولي": "يعني يوسف يعني طيران يعني حبيبي والله",
     "يوسف": "يعني بترولي يعني طيران يعني حبيبي والله",
-    "-": "**Welcome To Server Ottawa Please Check <#781902561333870623> <:b9c0dcde98313119:762315185670062121> !**",
-    ".": "**Welcome To Server Ottawa Please Check <#781902561333870623> <:b9c0dcde98313119:762315185670062121> !**",
+    "-": "**Welcome To Server Ottawa Please Check <#843868609864400938> <:b9c0dcde98313119:762315185670062121> !**",
+    ".": "**Welcome To Server Ottawa Please Check <#843868609864400938> <:b9c0dcde98313119:762315185670062121> !**",
     "السلام عليكم": "وعليكم السلام ورحمة الله وبركاته، نورت السيرفر",
     "السلام عليكم ورحمة الله وبركاته": "وعليكم السلام ورحمة الله وبركاته، نورت السيرفر",
     "سلام عليكم ورحمة الله وبركاته": "سلام عليكم ورحمة الله وبركاته",
@@ -18,39 +17,6 @@ replay = {
     "@everyone": "<a:gh:811299417151897622>",
     "@here": "<a:gh:811299417151897622>"
 }
-
-
-def get_bag(client, member: discord.Member) -> list:
-    list_bag = []
-    member_roles = [i.id for i in member.roles]
-    if member.id in client.owner_ids:  # owner
-        list_bag.append(str(client.get_emoji(826447166612570164)))
-
-    if 804401761636319242 in member_roles:  # Helper
-        list_bag.append(str(client.get_emoji(826449153751384084)))
-
-    if 813508502068133888 in member_roles:  # Trusted Developer
-        list_bag.append(str(client.get_emoji(790673460086571018)))
-
-    if 813514566620938331 in member_roles:  # Girl
-        list_bag.append(str(client.get_emoji(826457357176799253)))
-
-    if 805294664960966697 in member_roles:  # Friends
-        list_bag.append(str(client.get_emoji(654641909838381056)))
-
-    if 805294497521074264 in member_roles:  # youtubers
-        list_bag.append(str(client.get_emoji(826458908267905044)))
-
-    if 663393634946908170 in member_roles:  # booster
-        list_bag.append(str(client.get_emoji(748518646413918209)))
-
-    if 826738623587155990 in member_roles:  # Trusted Designer
-        list_bag.append(str(client.get_emoji(826870053554749460)))
-
-    if list_bag == []:
-        list_bag.append(str(client.get_emoji(826455187602145352)))
-
-    return list_bag
 
 
 class General(commands.Cog):
@@ -62,7 +28,7 @@ class General(commands.Cog):
 
     @commands.command(help='to set your custom title')
     @commands.guild_only()
-    async def title(self, ctx, *, title=None):
+    async def title(self, ctx, *, title):
         if ctx.author.bot:
             return
         if len(title) > 100:
@@ -93,7 +59,6 @@ class General(commands.Cog):
         )
         embed.add_field(name='user id:', value=member.id, inline=True)
         embed.add_field(name='user name:', value=member.name, inline=True)
-        embed.add_field(name='bag:', value=" | ".join(get_bag(self.client, member)), inline=True)
         embed.add_field(name='Thanks count:', value=f'`{x.info.get("thanks")}` ✨', inline=True)
         embed.add_field(name='message count(xp):', value=f'`{x.info.get("xp")}`', inline=True)
         embed.add_field(name="description:", value=x.info.get("description"))
@@ -112,15 +77,29 @@ class General(commands.Cog):
             return
 
         await ctx.message.add_reaction('⏳')
-        await ctx.message.reply(f"""
+        try:
+            await ctx.message.reply(f"""
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-```{data.get("type")[:2]}\n{data.get("code")}\n```
+```{data.get("type")}\n{data.get("code")}\n```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-{self.client.get_emoji(761876595770130452)} **Title** : {data.get("title")}
-{self.client.get_emoji(761876609358757918)} **Description** : {data.get("description")}
-{self.client.get_emoji(761876608196804609)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
-{self.client.get_emoji(761876614761807883)} **copyrights** : {data.get("copyrights")}
-{self.client.get_emoji(761876595006767104)} **language** : {data.get("type")}
+{self.client.get_emoji(861366683602911232)} **Title** : {data.get("title")}
+{self.client.get_emoji(861366683381923850)} **Description** : {data.get("description")}
+{self.client.get_emoji(861366683426619402)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
+{self.client.get_emoji(861366683057651722)} **copyrights** : {data.get("copyrights")}
+{self.client.get_emoji(861366681762267157)} **language** : {data.get("type")}
+⏳ **Add At:** {data.get("data")}
+🔗 **Pastebin:** <{data.get("link")}>
+""", allowed_mentions=discord.AllowedMentions.none())
+        except discord.errors.HTTPException:
+            await ctx.message.reply(f"""
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+{data.get("link")}
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+{self.client.get_emoji(861366683602911232)} **Title** : {data.get("title")}
+{self.client.get_emoji(861366683381923850)} **Description** : {data.get("description")}
+{self.client.get_emoji(861366683426619402)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
+{self.client.get_emoji(861366683057651722)} **copyrights** : {data.get("copyrights")}
+{self.client.get_emoji(861366681762267157)} **language** : {data.get("type")}
 ⏳ **Add At:** {data.get("data")}
 🔗 **Pastebin:** <{data.get("link")}>
 """, allowed_mentions=discord.AllowedMentions.none())

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import db
+import config
 
 
 class Help(commands.Cog):
@@ -17,13 +17,13 @@ class Help(commands.Cog):
             str_ = ""
             if command.aliases is not []:
                 str_ = f"**aliases:** {', '.join(command.aliases)}"
-            await ctx.send(f"**command:** !{command.name} {command.signature}\n{str_}")
+            await ctx.send(f"**command:** {config.prefix}{command.name} {command.signature}\n{str_}")
             return
         list_commands = []
         for i in self.client.commands:
             if i.hidden:
                 continue
-            list_commands.append(f"**!{i.name} {i.signature}** - {i.help}")
+            list_commands.append(f"**{config.prefix}{i.name} {i.signature}** - {i.help}")
         embed = discord.Embed(description="\n".join(list_commands), color=ctx.author.color)
         embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)

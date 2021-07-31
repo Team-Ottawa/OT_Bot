@@ -1,61 +1,65 @@
 import discord
 from discord.ext import commands, tasks
-import json
+import config
 from prettytable import PrettyTable
 import asyncio
 import os
 import db
+import DiscordUtils
 
 
-with open('./config.json', 'r') as f:
-    config = json.load(f)
-
-EXTENSIONS = [
+cogs = [
     "general",
     "post",
-    # "submit",
+    "vip",
     "mod",
     "welcome",
-    # "verified",
+    # "youtube",
     "thx",
-    "errors",
+    # "errors",
     "help",
     "xp",
-    "vip",
-    # 'dlel'
+    # "coins",
+    # 'test'
 ]
 
 
+def get_prefix(bot, msg):
+    return commands.when_mentioned_or(config.prefix)(bot, msg)
+
+
 client = commands.Bot(
-    command_prefix=commands.when_mentioned_or("!"),
+    command_prefix=get_prefix,
     case_insensitive=True,
     allowed_mentions=discord.AllowedMentions(
-        everyone=config["mention"]["everyone"],
-        users=config["mention"]["users"],
-        roles=config["mention"]["roles"]),
-    intents=discord.Intents.all()
+        everyone=False,
+        users=True,
+        roles=False
+    ),
+    intents=discord.Intents.all(),
+    owner_ids=config.owner_ids
 )
+client.tracker = DiscordUtils.InviteTracker(client)
 client.remove_command('help')
-client.client_id = config["client_id"]
-client.owner_ids = config["owner_id"]
 
-if config["token"] == "" or config["token"] == "token":
+
+if config.token == "" or config.token == "token":
     client.token = os.environ['token']
 else:
-    client.token = config["token"]
+    client.token = config.token
 
-for filename in EXTENSIONS:
+for filename in cogs:
     try:
         client.load_extension(f'cogs.{filename}')
         print('lode {}'.format(filename))
-    except:
-        print('error in {}'.format(filename))
+    except Exception as error:
+        print('error in {} as [{}]'.format(filename, error))
 
 
 @tasks.loop(seconds=10.0)
 async def change_stats():
     status = [
-        '!help | OTTAWA.exe',
+        '>help | OTTAWA.exe',
         'OTTAWA Team',
         '🧀'
         ]
@@ -68,8 +72,29 @@ async def change_stats():
 
 
 @client.event
+async def on_invite_create(invite):
+    await client.tracker.update_invite_cache(invite)
+
+
+@client.event
+async def on_invite_delete(invite):
+    await client.tracker.remove_invite_cache(invite)
+
+
+@client.event
 async def on_ready():
-    change_stats.start()
+    await client.tracker.cache_invites()
+    for i in client.users:
+        z = db.Coins(client, i.id)
+        z.insert()
+        x = db.DatabaseUsers(client, i.id)
+        if i.bot:
+            continue
+        x.insert()
+    await client.change_presence(
+        activity=discord.Activity(name='%shelp - discord.gg/ottawa' % config.prefix, type=discord.ActivityType.playing),
+        status=discord.Status.dnd
+    )
     tap = PrettyTable(
         ['Name Bot', 'Id', 'prefix', 'commands', 'users'])
     tap.add_row([

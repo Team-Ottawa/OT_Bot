@@ -3,8 +3,9 @@ prettytable~=2.1.0
 asyncio~=3.4.3
 Pillow
 arabic_reshaper
-
+discord-py-slash-command
 mysql-connector-python~=8.0.23
 pymongo~=3.11.3
 requests~=2.25.1
 dnspython
+requests
