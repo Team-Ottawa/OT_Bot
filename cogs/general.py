@@ -122,6 +122,14 @@ class General(commands.Cog):
 {other}
 """, allowed_mentions=discord.AllowedMentions.none())
 
+    @slash_cog(
+        name="source",
+        description="get source code from me 😭😭😭",
+        guild_ids=[config.guild_id]
+    )
+    async def source_code(self, ctx):
+        await ctx.respond("https://github.com/Team-Ottawa/OT_Bot")
+
     @commands.Cog.listener()
     async def on_message(self, ctx):
         if ctx.guild is None:
