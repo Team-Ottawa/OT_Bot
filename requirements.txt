@@ -11,5 +11,5 @@ captcha
 bs4
 beautifulsoup4
 python-dotenv
-discord_ui
+discord-ui
 DiscordUtils
