@@ -1,7 +1,11 @@
 import discord
 from discord.ext import commands
 import time
+import config
 import db
+from discord_ui import SlashOption
+from discord_ui.cogs import slash_cog
+
 
 replay = {
     "صقر": "يا عمر صقر",
@@ -26,9 +30,30 @@ class General(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(help='to set your custom title')
-    @commands.guild_only()
-    async def title(self, ctx, *, title):
+    @slash_cog(
+        name="ping",
+        guild_ids=[config.guild_id],
+    )
+    async def ping(self, ctx):
+        before = time.monotonic()
+        msg = await ctx.respond("pong!")
+        ping = (time.monotonic() - before) * 1000
+        await msg.edit(content="```c\nTime taken: {}ms\nDiscord API: {}ms```".format(int(ping), round(self.client.latency * 1000)))
+
+    @slash_cog(
+        name="title",
+        description="تغير وصفك",
+        guild_ids=[config.guild_id],
+        options=[
+            SlashOption(
+                str,
+                name="title",
+                description="to set your custom title",
+                required=True,
+            )
+        ]
+    )
+    async def title(self, ctx, title):
         if ctx.author.bot:
             return
         if len(title) > 100:
@@ -36,22 +61,17 @@ class General(commands.Cog):
             return
         x = db.DatabaseUsers(self.client, ctx.author.id)
         x.update_where("description", title)
-        await ctx.message.add_reaction(self.client.get_emoji(771050418498306068))
+        await ctx.respond("ابشر به تم من الشنب")
 
-    @commands.command(invoke_without_command=True, hidden=True)
-    @commands.guild_only()
-    async def ping(self, ctx):
-        before = time.monotonic()
-        msg = await ctx.send("pong!")
-        ping = (time.monotonic() - before) * 1000
-        await msg.edit(content="```c\nTime taken: {}ms\nDiscord API: {}ms```".format(int(ping), round(self.client.latency * 1000)))
-
-    @commands.command(help='show the info users')
-    @commands.guild_only()
+    @slash_cog(
+        name="profile",
+        description="show the info users",
+        guild_ids=[config.guild_id]
+    )
     async def profile(self, ctx, member: discord.Member = None):
         member = member if member else ctx.author
         if member.bot:
-            await ctx.send("this user is bot 🙃.")
+            await ctx.respond("this user is bot 🙃.")
             return
         x = db.DatabaseUsers(self.client, member.id)
         embed = discord.Embed(
@@ -62,46 +82,44 @@ class General(commands.Cog):
         embed.add_field(name='Thanks count:', value=f'`{x.info.get("thanks")}` ✨', inline=True)
         embed.add_field(name='message count(xp):', value=f'`{x.info.get("xp")}`', inline=True)
         embed.add_field(name="description:", value=x.info.get("description"))
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
-        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=member.avatar.url)
+        embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar.url)
+        embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon.url)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='info', help="Show info code by id")
-    @commands.guild_only()
-    async def info_code(self, ctx, code_id):
+    @slash_cog(
+        name="info",
+        description="Show info code by id",
+        guild_ids=[config.guild_id],
+    )
+    async def info_code(self, ctx, code_id: str):
         x = db.DatabaseCodes(self.client, code_id)
         data = x.info
         if data is None:
-            await ctx.send('حمبي هاذ الكود مش موجود, لا توجع لي راسي خذ 🥕')
+            await ctx.respond('حمبي هاذ الكود مش موجود, لا توجع لي راسي خذ 🥕')
             return
-
-        await ctx.message.add_reaction('⏳')
+        other = f"""
+{self.client.get_emoji(861366683602911232)} **Title** : {data.get("title")}
+{self.client.get_emoji(861366683381923850)} **Description** : {data.get("description")}
+{self.client.get_emoji(861366683426619402)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
+{self.client.get_emoji(861366683057651722)} **copyrights** : {data.get("copyrights")}
+{self.client.get_emoji(861366681762267157)} **language** : {data.get("type")}
+⏳ **Add At:** {data.get("data")}
+🔗 **Pastebin:** <{data.get("link")}>
+        """
         try:
-            await ctx.message.reply(f"""
+            await ctx.respond(f"""
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ```{data.get("type")}\n{data.get("code")}\n```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-{self.client.get_emoji(861366683602911232)} **Title** : {data.get("title")}
-{self.client.get_emoji(861366683381923850)} **Description** : {data.get("description")}
-{self.client.get_emoji(861366683426619402)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
-{self.client.get_emoji(861366683057651722)} **copyrights** : {data.get("copyrights")}
-{self.client.get_emoji(861366681762267157)} **language** : {data.get("type")}
-⏳ **Add At:** {data.get("data")}
-🔗 **Pastebin:** <{data.get("link")}>
+{other}
 """, allowed_mentions=discord.AllowedMentions.none())
         except discord.errors.HTTPException:
-            await ctx.message.reply(f"""
+            await ctx.respond(f"""
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 {data.get("link")}
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-{self.client.get_emoji(861366683602911232)} **Title** : {data.get("title")}
-{self.client.get_emoji(861366683381923850)} **Description** : {data.get("description")}
-{self.client.get_emoji(861366683426619402)} **shared By** : {await self.client.fetch_user(data.get("author_id"))}
-{self.client.get_emoji(861366683057651722)} **copyrights** : {data.get("copyrights")}
-{self.client.get_emoji(861366681762267157)} **language** : {data.get("type")}
-⏳ **Add At:** {data.get("data")}
-🔗 **Pastebin:** <{data.get("link")}>
+{other}
 """, allowed_mentions=discord.AllowedMentions.none())
 
     @commands.Cog.listener()

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import db
 import config
+from discord_ui.cogs import slash_cog, subslash_cog
 
 
 class Xp(commands.Cog):
@@ -66,9 +67,13 @@ class Xp(commands.Cog):
     async def on_ready(self):
         self.voice_xp.start()
 
-    @commands.group(name='top', invoke_without_command=True, help='Get leaderboards from the server')
-    @commands.guild_only()
-    async def top_(self, ctx):
+    @slash_cog(
+        name="leaderboard",
+        guild_ids=[config.guild_id],
+        description="Get leaderboards from the server",
+    )
+    async def top(self, ctx):
+        msg = await ctx.respond("شكرا لانك واحد محترم تستعمل بوت اوتاوا الاصلي انتظر شوي اذا تقدر")
         top_xp = ""
         top_thanks = ""
         top_voice = ""
@@ -116,14 +121,19 @@ class Xp(commands.Cog):
             title="Ottawa Top Leaderboards",
             color=0xFFFDFD
         )
-        embed.add_field(name='💬 top xp', value=top_xp + "✨ More? `#top xp`", inline=True)
-        embed.add_field(name='🌟 top thanks', value=top_thanks + "✨ More? `#top thanks`", inline=True)
-        embed.add_field(name='🔊 top voice', value=top_voice + "✨ More? `#top voice`", inline=False)
-        await ctx.send(embed=embed)
+        embed.add_field(name='💬 top xp', value=top_xp + "✨ More? `/top xp`", inline=True)
+        embed.add_field(name='🌟 top thanks', value=top_thanks + "✨ More? `/top thanks`", inline=True)
+        embed.add_field(name='🔊 top voice', value=top_voice + "✨ More? `/top voice`", inline=False)
+        await msg.edit(content="_ _", embed=embed)
 
-    @top_.command(name="voice", aliases=['vc'])
-    @commands.guild_only()
+    @subslash_cog(
+        base_names="top",
+        name="voice",
+        guild_ids=[config.guild_id],
+        description="Get voice leaderboards from the server",
+    )
     async def top_voice(self, ctx, page_id: int = 1):
+        msg = await ctx.respond("شكرا لانك واحد محترم تستعمل بوت اوتاوا الاصلي انتظر شوي اذا تقدر")
         x = db.DatabaseUsers(self.client, ctx.author.id)
         v = x.get_from_page_id(module='voice_xp', page_id=page_id)
         top_voice = ""
@@ -145,11 +155,16 @@ class Xp(commands.Cog):
             color=0xFFFDFD
         )
         embed.add_field(name='🔊 top voice [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)), value=top_voice, inline=True)
-        await ctx.send(embed=embed)
+        await msg.edit(content="_ _", embed=embed)
 
-    @top_.command(name="text", aliases=['xp', 'message'])
-    @commands.guild_only()
+    @subslash_cog(
+        base_names="top",
+        name="xp",
+        guild_ids=[config.guild_id],
+        description="Get messages leaderboards from the server",
+    )
     async def top_text(self, ctx, page_id: int = 1):
+        msg = await ctx.respond("شكرا لانك واحد محترم تستعمل بوت اوتاوا الاصلي انتظر شوي اذا تقدر")
         top_xp = ""
         x = db.DatabaseUsers(self.client, ctx.author.id)
         v = x.get_from_page_id(module='xp', page_id=page_id)
@@ -171,11 +186,16 @@ class Xp(commands.Cog):
             color=0xFFFDFD
         )
         embed.add_field(name='💬 top xp [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)), value=top_xp, inline=True)
-        await ctx.send(embed=embed)
+        await msg.edit(content="_ _", embed=embed)
 
-    @top_.command(name="thanks", aliases=['thank', 'thx'])
-    @commands.guild_only()
+    @subslash_cog(
+        base_names="top",
+        name="thanks",
+        guild_ids=[config.guild_id],
+        description="Get thanks leaderboards from the server",
+    )
     async def top_thanks(self, ctx, page_id: int = 1):
+        msg = await ctx.respond("شكرا لانك واحد محترم تستعمل بوت اوتاوا الاصلي انتظر شوي اذا تقدر")
         top_thanks = ""
         x = db.DatabaseUsers(self.client, ctx.author.id)
         v = x.get_from_page_id(module='thanks', page_id=page_id)
@@ -200,7 +220,7 @@ class Xp(commands.Cog):
             name='🌟 top thanks [%s/%s]' % (page_id, round(len([i for i in x.all]) / 10)),
             value=top_thanks, inline=True
         )
-        await ctx.send(embed=embed)
+        await msg.edit(content="_ _", embed=embed)
 
 
 def setup(client):

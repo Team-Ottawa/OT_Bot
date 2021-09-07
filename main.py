@@ -1,20 +1,20 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import config
 from prettytable import PrettyTable
-import asyncio
 import os
 import db
 import DiscordUtils
+from discord_ui import UI, SelectMenu, SelectOption
 
 
 cogs = [
     "general",
     "post",
-    "vip",
+    "youtube",
     "mod",
     "welcome",
-    # "youtube",
+    "license",
     "thx",
     # "errors",
     "help",
@@ -39,6 +39,8 @@ client = commands.Bot(
     intents=discord.Intents.all(),
     owner_ids=config.owner_ids
 )
+
+ui = UI(client)
 client.tracker = DiscordUtils.InviteTracker(client)
 client.remove_command('help')
 
@@ -56,21 +58,6 @@ for filename in cogs:
         print('error in {} as [{}]'.format(filename, error))
 
 
-@tasks.loop(seconds=10.0)
-async def change_stats():
-    status = [
-        '>help | OTTAWA.exe',
-        'OTTAWA Team',
-        '🧀'
-        ]
-    await client.change_presence(activity=discord.Game(type=discord.ActivityType.listening, name=(status[0])))
-    await asyncio.sleep(30)
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status[1]))
-    await asyncio.sleep(10)
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status[2]))
-    await asyncio.sleep(10)
-
-
 @client.event
 async def on_invite_create(invite):
     await client.tracker.update_invite_cache(invite)
@@ -84,13 +71,13 @@ async def on_invite_delete(invite):
 @client.event
 async def on_ready():
     await client.tracker.cache_invites()
-    for i in client.users:
-        z = db.Coins(client, i.id)
-        z.insert()
-        x = db.DatabaseUsers(client, i.id)
-        if i.bot:
-            continue
-        x.insert()
+    # for i in client.users:
+    #     z = db.Coins(client, i.id)
+    #     z.insert()
+    #     x = db.DatabaseUsers(client, i.id)
+    #     if i.bot:
+    #         continue
+    #     x.insert()
     await client.change_presence(
         activity=discord.Activity(name='%shelp - discord.gg/ottawa' % config.prefix, type=discord.ActivityType.playing),
         status=discord.Status.dnd

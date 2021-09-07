@@ -1,97 +1,73 @@
 import discord
 from discord.ext import commands
-import requests
 import config
+from discord.http import Route
+from discord_ui.cogs import slash_cog
 
 
 class YouTube(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
-    @commands.command(name='youtube')
-    @commands.guild_only()
+    async def create_invite(self, channel_id, target_application_id):
+        route = Route("POST", f"/channels/{channel_id}/invites")
+        re = await self.bot.http.request(
+            route,
+            json={
+                "max_age": 3600,
+                "max_uses": 0,
+                "target_application_id": str(target_application_id),
+                "target_type": 2,
+                "temporary": False,
+                "validate": None
+            })
+        return f"https://discord.gg/{re['code']}"
+
+    @slash_cog(
+        name="youtube",
+        description="create youtube watch from voice channel",
+        guild_ids=[config.guild_id]
+    )
     async def youtube(self, ctx):
-        chn = ctx.author.voice
-        if chn == None:
-            return await ctx.send("please join voice channel")
-        channel = chn.channel
-        x = requests.post(
-            "https://discord.com/api/v8/channels/%s/invites" % channel.id,
-            json={
-                "max_age": 3600,
-                "max_uses": 0,
-                "target_application_id": "755600276941176913",
-                "target_type": 2,
-                "temporary": False,
-                "validate": None
-            },
-            headers={
-                "Authorization": "Bot %s" % config.token,
-                "Content-Type": "application/json"
-            }
-        )
-        code = x.json()["code"]
+        voice_channel = ctx.author.voice
+        if not voice_channel:
+            return await ctx.respond("please join voice channel", hidden=True)
+        url = await self.create_invite(voice_channel.channel.id, "755600276941176913")
         embed = discord.Embed(
-            description="Playing youtube [click here](https://discord.gg/%s)" % code
+            description=f"Playing youtube [click here]({url})"
         )
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='betrayal')
-    @commands.guild_only()
+    @slash_cog(
+        name="betrayal",
+        description="create betrayal playing from voice channel",
+        guild_ids=[config.guild_id]
+    )
     async def betrayal(self, ctx):
-        chn = ctx.author.voice
-        if chn == None:
-            return await ctx.send("please join voice channel")
-        channel = chn.channel
-        x = requests.post(
-            "https://discord.com/api/v8/channels/%s/invites" % channel.id,
-            json={
-                "max_age": 3600,
-                "max_uses": 0,
-                "target_application_id": "773336526917861400",
-                "target_type": 2,
-                "temporary": False,
-                "validate": None
-            },
-            headers={
-                "Authorization": "Bot %s" % config.token,
-                "Content-Type": "application/json"
-            }
-        )
-        code = x.json()["code"]
+        voice_channel = ctx.author.voice
+        if not voice_channel:
+            return await ctx.respond("please join voice channel", hidden=True)
+        url = await self.create_invite(voice_channel.channel.id, "773336526917861400")
         embed = discord.Embed(
-            description="[click here](https://discord.gg/%s)" % code
+            description=f"[click here]({url})"
         )
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='fishington')
-    @commands.guild_only()
+    @slash_cog(
+        name="fishington",
+        description="create betrayal fishington from voice channel",
+        guild_ids=[config.guild_id]
+    )
     async def fishington(self, ctx):
-        chn = ctx.author.voice
-        if chn == None:
-            return await ctx.send("please join voice channel")
-        channel = chn.channel
-        x = requests.post(
-            "https://discord.com/api/v8/channels/%s/invites" % channel.id,
-            json={
-                "max_age": 3600,
-                "max_uses": 0,
-                "target_application_id": "814288819477020702",
-                "target_type": 2,
-                "temporary": False,
-                "validate": None
-            },
-            headers={
-                "Authorization": "Bot %s" % config.token,
-                "Content-Type": "application/json"
-            }
-        )
-        code = x.json()["code"]
+        voice_channel = ctx.author.voice
+        if not voice_channel:
+            return await ctx.respond("please join voice channel", hidden=True)
+        url = await self.create_invite(voice_channel.channel.id, "814288819477020702")
         embed = discord.Embed(
-            description="[click here](https://discord.gg/%s)" % code
+            description=f"[click here]({url})"
         )
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
 
-def setup(client):
-    client.add_cog(YouTube(client))
+def setup(bot):
+    bot.add_cog(YouTube(bot))

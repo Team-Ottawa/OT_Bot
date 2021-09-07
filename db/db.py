@@ -153,7 +153,6 @@ class DatabaseCodes:
             "data": datetime.now().timestamp(),
             "link": self._create_link(title, type, code)
         }
-        print(json)
         try:
             x = col_codes.insert_one(json)
             return x

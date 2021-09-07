@@ -40,10 +40,10 @@ class ErrorHandler(commands.Cog):
             await ctx.send(embed=embed)
             return
         elif isinstance(error, commands.errors.MissingPermissions):
-            await ctx.send("Missing permissions `%s`" % error.missing_perms)
+            await ctx.send("Missing permissions `%s`" % error.missing_permissions)
             return
         elif isinstance(error, commands.errors.BotMissingPermissions):
-            await ctx.send("I Missing permissions `%s`" % error.missing_perms)
+            await ctx.send("I Missing permissions `%s`" % error.missing_permissions)
         elif isinstance(error, commands.errors.CommandNotFound):
             return
         elif isinstance(error, commands.errors.MissingRole):
