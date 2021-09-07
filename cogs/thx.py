@@ -17,20 +17,20 @@ class Thx(commands.Cog):
         description="to thanks the Helper",
         guild_ids=[config.guild_id]
     )
-    async def thx_command(self, ctx, user: discord.Member):
-        if user == ctx.author:
+    async def thx_command(self, ctx, member: discord.Member):
+        if member == ctx.author:
             await ctx.respond("ممنوع تشكر نفسك يا طفل")
             return
         if ctx.author.id in list_:
             await ctx.respond("you can thx the user after two hours 🙃.")
             return
-        if user.bot:
+        if member.bot:
             await ctx.respond("this user is bot 🙃.")
             return
-        x = db.DatabaseUsers(self.client, user.id)
+        x = db.DatabaseUsers(self.client, member.id)
         old_thanks = x.info.get("thanks")
         x.update_where("thanks", int(old_thanks)+1)
-        await ctx.respond(f"done thanks {user.mention}, thx count is `{int(old_thanks)+1}`")
+        await ctx.respond(f"done thanks {member.mention}, thx count is `{int(old_thanks)+1}`")
         list_.append(ctx.author.id)
         await asyncio.sleep(7200)
         list_.remove(ctx.author.id)

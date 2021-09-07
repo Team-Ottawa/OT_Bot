@@ -3,9 +3,8 @@ from discord.ext import commands
 import config
 from prettytable import PrettyTable
 import os
-import db
 import DiscordUtils
-from discord_ui import UI, SelectMenu, SelectOption
+from discord_ui import UI
 
 
 cogs = [
@@ -16,11 +15,9 @@ cogs = [
     "welcome",
     "license",
     "thx",
-    # "errors",
+    "errors",
     "help",
     "xp",
-    # "coins",
-    # 'test'
 ]
 
 
