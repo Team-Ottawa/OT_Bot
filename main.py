@@ -18,6 +18,7 @@ cogs = [
     "errors",
     "help",
     "xp",
+    "search"
 ]
 
 
@@ -34,7 +35,9 @@ client = commands.Bot(
         roles=False
     ),
     intents=discord.Intents.all(),
-    owner_ids=config.owner_ids
+    owner_ids=config.owner_ids,
+    activity=discord.Activity(name='%shelp - discord.gg/ottawa' % config.prefix, type=discord.ActivityType.playing),
+    status=discord.Status.dnd
 )
 
 ui = UI(client)
@@ -60,6 +63,12 @@ async def on_invite_create(invite):
     await client.tracker.update_invite_cache(invite)
 
 
+@client.listen("on_guild_join")
+async def on_guild_join(guild: discord.Guild):
+    if guild.id != config.guild_id:
+        await guild.leave()
+
+
 @client.event
 async def on_invite_delete(invite):
     await client.tracker.remove_invite_cache(invite)
@@ -67,18 +76,11 @@ async def on_invite_delete(invite):
 
 @client.event
 async def on_ready():
+    # await ui.slash.delete_guild_commands("843865725886398554")
     await client.tracker.cache_invites()
-    # for i in client.users:
-    #     z = db.Coins(client, i.id)
-    #     z.insert()
-    #     x = db.DatabaseUsers(client, i.id)
-    #     if i.bot:
-    #         continue
-    #     x.insert()
-    await client.change_presence(
-        activity=discord.Activity(name='%shelp - discord.gg/ottawa' % config.prefix, type=discord.ActivityType.playing),
-        status=discord.Status.dnd
-    )
+    for guild in client.guilds:
+        if guild.id != config.guild_id:
+            await guild.leave()
     tap = PrettyTable(
         ['Name Bot', 'Id', 'prefix', 'commands', 'users'])
     tap.add_row([

@@ -154,7 +154,7 @@ class Share:
 
                 await channel.send(f"{ctx.guild.get_role(843871660625231902).mention} | {id}", embed=embed)
                 return
-            await ctx.send(embed=discord.Embed(description="تم الغاء الامر", color=0xf7072b))
+            await ctx.author.send(embed=discord.Embed(description="تم الغاء الامر", color=0xf7072b))
         except TimeoutError:
             yes.disabled = True
             no.disabled = True

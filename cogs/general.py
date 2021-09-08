@@ -130,6 +130,14 @@ class General(commands.Cog):
     async def source_code(self, ctx):
         await ctx.respond("https://github.com/Team-Ottawa/OT_Bot")
 
+    @slash_cog(
+        name="invite",
+        description="Get invite the bot",
+        guild_ids=[config.guild_id]
+    )
+    async def invite(self, ctx):
+        await ctx.respond(f"https://discord.com/api/oauth2/authorize?client_id={self.client.user.id}&scope=applications.commands")
+
     @commands.Cog.listener()
     async def on_message(self, ctx):
         if ctx.guild is None:
